@@ -1,0 +1,59 @@
+package com.start.Hackathon.controller;
+
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
+
+import com.start.Hackathon.model.contentdetails;
+
+@RestController
+public class AssetController {
+
+	@Autowired
+	private RestOperations restoperations;
+
+	private final String url;
+
+	@Autowired
+	public AssetController(@Value("${predix.asset.metadata.restHost}") final String url) {
+		this.url = url;
+	}
+
+	@RequestMapping(value = "/getallAssets", method = RequestMethod.GET)
+	public ResponseEntity<contentdetails> getallassets() {
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		
+		
+		
+		headers.set("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiI0MTk4NjIxN2Q5ZDY0ZjM4YmM0MjljOWZjZjFkN2E4MCIsInN1YiI6InNkLmhhY2thdGhvbiIsInNjb3BlIjpbImllLWN1cnJlbnQuUFNELUlFLUlNQUdFLklFLUlNQUdFLkxJTUlURUQuREVWRUxPUCIsImllLWN1cnJlbnQuUFNELUlFLVRSQUZGSUMuSUUtVFJBRkZJQy5MSU1JVEVELkRFVkVMT1AiLCJpZS1jdXJyZW50LlNELUlFLVZJREVPLklFLVZJREVPLkxJTUlURUQuREVWRUxPUCIsInVhYS5yZXNvdXJjZSIsImllLWN1cnJlbnQuUFNELUlFLVBFREVTVFJJQU4uSUUtUEVERVNUUklBTi5MSU1JVEVELkRFVkVMT1AiLCJpZS1jdXJyZW50LlNELUlFLVBBUktJTkcuSUUtUEFSS0lORy5MSU1JVEVELkRFVkVMT1AiLCJpZS1jdXJyZW50LlNELUlFLUlNQUdFLklFLUlNQUdFLkxJTUlURUQuREVWRUxPUCIsImllLWN1cnJlbnQuUFNELUlFLVBBUktJTkcuSUUtUEFSS0lORy5MSU1JVEVELkRFVkVMT1AiLCJpZS1jdXJyZW50LlBTRC1JRS1WSURFTy5JRS1WSURFTy5MSU1JVEVELkRFVkVMT1AiLCJpZS1jdXJyZW50LlNELUlFLVRSQUZGSUMuSUUtVFJBRkZJQy5MSU1JVEVELkRFVkVMT1AiLCJpZS1jdXJyZW50LlNELUlFLUVOVklST05NRU5UQUwuSUUtRU5WSVJPTk1FTlRBTC5MSU1JVEVELkRFVkVMT1AiLCJpZS1jdXJyZW50LlBTRC1JRS1FTlZJUk9OTUVOVEFMLklFLUVOVklST05NRU5UQUwuTElNSVRFRC5ERVZFTE9QIiwiaWUtY3VycmVudC5TRC1JRS1QRURFU1RSSUFOLklFLVBFREVTVFJJQU4uTElNSVRFRC5ERVZFTE9QIl0sImNsaWVudF9pZCI6InNkLmhhY2thdGhvbiIsImNpZCI6InNkLmhhY2thdGhvbiIsImF6cCI6InNkLmhhY2thdGhvbiIsImdyYW50X3R5cGUiOiJjbGllbnRfY3JlZGVudGlhbHMiLCJyZXZfc2lnIjoiNWE0YzhlYyIsImlhdCI6MTUyMDM4Mzg0MSwiZXhwIjoxNTIwOTg4NjQxLCJpc3MiOiJodHRwczovLzYyNGVmZjAyLWRiYjEtNGM2Yy05MGJjLWZhODVhMjllNWZhOC5wcmVkaXgtdWFhLnJ1bi5hd3MtdXN3MDItcHIuaWNlLnByZWRpeC5pby9vYXV0aC90b2tlbiIsInppZCI6IjYyNGVmZjAyLWRiYjEtNGM2Yy05MGJjLWZhODVhMjllNWZhOCIsImF1ZCI6WyJpZS1jdXJyZW50LlNELUlFLUlNQUdFLklFLUlNQUdFLkxJTUlURUQiLCJpZS1jdXJyZW50LlBTRC1JRS1WSURFTy5JRS1WSURFTy5MSU1JVEVEIiwiaWUtY3VycmVudC5QU0QtSUUtVFJBRkZJQy5JRS1UUkFGRklDLkxJTUlURUQiLCJpZS1jdXJyZW50LlBTRC1JRS1QRURFU1RSSUFOLklFLVBFREVTVFJJQU4uTElNSVRFRCIsImllLWN1cnJlbnQuUFNELUlFLVBBUktJTkcuSUUtUEFSS0lORy5MSU1JVEVEIiwiaWUtY3VycmVudC5QU0QtSUUtRU5WSVJPTk1FTlRBTC5JRS1FTlZJUk9OTUVOVEFMLkxJTUlURUQiLCJpZS1jdXJyZW50LlNELUlFLVZJREVPLklFLVZJREVPLkxJTUlURUQiLCJpZS1jdXJyZW50LlNELUlFLVBBUktJTkcuSUUtUEFSS0lORy5MSU1JVEVEIiwiaWUtY3VycmVudC5TRC1JRS1UUkFGRklDLklFLVRSQUZGSUMuTElNSVRFRCIsImllLWN1cnJlbnQuUFNELUlFLUlNQUdFLklFLUlNQUdFLkxJTUlURUQiLCJ1YWEiLCJpZS1jdXJyZW50LlNELUlFLUVOVklST05NRU5UQUwuSUUtRU5WSVJPTk1FTlRBTC5MSU1JVEVEIiwiaWUtY3VycmVudC5TRC1JRS1QRURFU1RSSUFOLklFLVBFREVTVFJJQU4uTElNSVRFRCIsInNkLmhhY2thdGhvbiJdfQ.TtIsv7sC8zEyc1PcdjrMYW6T6dgi8b1MFW-lE9DqmzZzNMGnTnIrp_h5FaLos0fq5gvv33uv55JiCOPP_i6alcdtCJF49EB2CoM-whfa5IAmJUKJDrPhYlBOdyMzk-T22lVNifO8LJkYYtiq5_De1RAGrE6WRkf2RmGh8OQ01TN5R7pcJqHbWWa-o8fJeJy25Wh757SdYROm4CTCb5rJuRjk6XDmyufsId6WAz8qhRrgMA3N-n1tJfc7saMPqu-DL5tNxEyR4jY_r9QDdXKvqcU0Ow8QdNKKk0ij-1QfeBh3DyEA35B32DKh8HZSmlBRWw7vcZedbER--G6aNffc3g" );
+		headers.set("Predix-Zone-Id", "SD-IE-TRAFFIC");
+
+		System.out.println(" Predix zone id is ${predix.asset.traffic.zoneid}");
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+		System.out.println(url +"assets/search?bbox=33.077762:-117.663817,32.559574:-116.584410&page=0&size=200&q=assetType:CAMERA");
+		return restTemplate.exchange(url +"assets/search?bbox=33.077762:-117.663817,32.559574:-116.584410&page=0&size=200&q=assetType:CAMERA", HttpMethod.GET, entity, contentdetails.class);
+
+		// return restoperations.getForObject(url,companydetails.class);
+	}
+
+	/*
+	 * @RequestMapping(value = "/getassetsByAssetId", method = RequestMethod.GET)
+	 * public Cards getContract5() { return restoperations.getForObject(url,
+	 * Cards.class); }
+	 */
+
+}
