@@ -46,6 +46,13 @@ public class media {
 		this.url = url;
 	}
 	
+	@Override
+	public String toString() {
+		return "media [url=" + url + "]";
+	}
+	
+	
+	
 	
 	
 }

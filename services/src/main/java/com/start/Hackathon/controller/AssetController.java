@@ -1,6 +1,10 @@
 package com.start.Hackathon.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +22,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.start.Hackathon.model.AssetDetails;
 import com.start.Hackathon.model.contentdetails;
+import com.start.Hackathon.model.media;
+import com.start.Hackathon.model.mediastep1;
+import com.start.Hackathon.model.mediastep2;
 
 @RestController
 public class AssetController {
@@ -46,7 +53,7 @@ public class AssetController {
 				"Bearer "+authorization);
 		headers.set("Predix-Zone-Id", "SD-IE-TRAFFIC");
 
-		System.out.println(" Predix zone id is ${predix.asset.traffic.zoneid}");
+		//System.out.println(" Predix zone id is ${predix.asset.traffic.zoneid}");
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
 		return restTemplate.exchange(url
@@ -98,5 +105,9 @@ public class AssetController {
 	 * public Cards getContract5() { return restoperations.getForObject(url,
 	 * Cards.class); }
 	 */
+	
+	
+	// dummy method
+		
 
 }
