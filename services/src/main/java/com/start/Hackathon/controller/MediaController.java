@@ -21,11 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-import com.start.Hackathon.model.contentdetails;
-import com.start.Hackathon.model.entries;
-import com.start.Hackathon.model.media;
-import com.start.Hackathon.model.mediastep1;
-import com.start.Hackathon.model.mediastep2;
+import com.start.Hackathon.model.assets.contentdetails;
+import com.start.Hackathon.model.media.entries;
+import com.start.Hackathon.model.media.media;
+import com.start.Hackathon.model.media.mediastep1;
+import com.start.Hackathon.model.media.mediastep2;
 
 @RestController
 public class MediaController {
@@ -35,44 +35,39 @@ public class MediaController {
 
 	private final String url;
 	private final String authorization;
+	private static int imageid;
+	RestTemplate restTemplate;
 
 	@Autowired
 	public MediaController(@Value("${predix.asset.media.restHost}") final String url,
 			@Value("${predix.bearer.token}") final String authorization) {
 		this.url = url;
 		this.authorization = authorization;
+		restTemplate = new RestTemplate();
 	}
 
 	@RequestMapping(value = "/getmediabyasset", method = RequestMethod.POST)
 	public List<byte[]> getmediabyasset(@RequestParam String assetuid, @RequestParam String startts,
-			@Value("${predix.asset.image.zoneid}") final String predixZoneId) {
+			@Value("${predix.asset.image.zoneid}") final String predixZoneId) throws IOException {
 
-		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders headers = new HttpHeaders();
-
-		headers.set("Authorization", "Bearer " + authorization);
-		headers.set("Predix-Zone-Id", predixZoneId);
-
-		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-		System.out.println(url + "ondemand/assets/" + assetuid + "/media?mediaType=IMAGE&timestamp=" + startts);
 		ResponseEntity<mediastep1> m1 = restTemplate.exchange(
 				url + "ondemand/assets/" + assetuid + "/media?mediaType=IMAGE&timestamp=" + startts, HttpMethod.GET,
-				entity, mediastep1.class);
+				getHeaders(), mediastep1.class);
 
 		String url1 = m1.getBody().getPollUrl();
-		System.out.println(m1.getBody().getPollUrl());
-		ResponseEntity<mediastep2> m2 = restTemplate.exchange(url1, HttpMethod.GET, entity, mediastep2.class);
+		// System.out.println(m1.getBody().getPollUrl());
+		ResponseEntity<mediastep2> m2 = restTemplate.exchange(url1, HttpMethod.GET, getHeaders(), mediastep2.class);
 
 		media[] m = m2.getBody().getListOfEntries().getContent();
 
 		List<byte[]> is = new ArrayList<byte[]>();
 
 		for (media x : m) {
-			ResponseEntity<byte[]> i = restTemplate.exchange(x.getUrl(), HttpMethod.GET, entity, byte[].class);
+			ResponseEntity<byte[]> i = restTemplate.exchange(x.getUrl(), HttpMethod.GET, getHeaders(), byte[].class);
 			System.out.println("before printing image");
 			byte[] xe = i.getBody();
 			is.add(xe);
-			// Files.write(Paths.get("image.jpg"), xe);
+			Files.write(Paths.get("image" + String.valueOf(imageid++) + ".jpg"), xe);
 			// System.out.println(i);
 		}
 
@@ -123,90 +118,72 @@ public class MediaController {
 		return is;
 
 	}
-	
-	
+
 	@RequestMapping(value = "/getmediabylocation", method = RequestMethod.POST)
 	public List<byte[]> getmediabylocation(@RequestParam String location, @RequestParam String startts,
 			@Value("${predix.asset.image.zoneid}") final String predixZoneId) throws IOException {
 
-		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders headers = new HttpHeaders();
-
-		headers.set("Authorization", "Bearer " + authorization);
-		headers.set("Predix-Zone-Id", predixZoneId);
-
-		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-		/*System.out.println(url + "ondemand/locations/" + assetuid + "/media?mediaType=IMAGE&timestamp=" + startts);*/
+	
 		ResponseEntity<mediastep1> m1 = restTemplate.exchange(
-				url + "ondemand/locations/" +  location + "/media?mediaType=IMAGE&timestamp=" + startts, HttpMethod.GET,
-				entity, mediastep1.class);
+				url + "ondemand/locations/" + location + "/media?mediaType=IMAGE&timestamp=" + startts, HttpMethod.GET,
+				getHeaders(), mediastep1.class);
 
 		String url1 = m1.getBody().getPollUrl();
 		System.out.println(m1.getBody().getPollUrl());
-		ResponseEntity<mediastep2> m2 = restTemplate.exchange(url1, HttpMethod.GET, entity, mediastep2.class);
+		ResponseEntity<mediastep2> m2 = restTemplate.exchange(url1, HttpMethod.GET, getHeaders(), mediastep2.class);
 
 		media[] m = m2.getBody().getListOfEntries().getContent();
 
 		List<byte[]> is = new ArrayList<byte[]>();
 
 		for (media x : m) {
-			ResponseEntity<byte[]> i = restTemplate.exchange(x.getUrl(), HttpMethod.GET, entity, byte[].class);
+			ResponseEntity<byte[]> i = restTemplate.exchange(x.getUrl(), HttpMethod.GET, getHeaders(), byte[].class);
 			System.out.println("before printing image");
 			byte[] xe = i.getBody();
 			is.add(xe);
-			 Files.write(Paths.get("image.jpg"), xe);
+			Files.write(Paths.get("image.jpg"), xe);
 			// System.out.println(i);
 		}
 
 		return is;
 
 	}
-	
-	
-	
-	
-	
+
 	@RequestMapping(value = "/getvideobylocation", method = RequestMethod.POST)
 	public List<byte[]> getvideobylocation(@RequestParam String location, @RequestParam String startts,
 			@Value("${predix.asset.video.zoneid}") final String predixZoneId) throws IOException {
 
-		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders headers = new HttpHeaders();
-
-		headers.set("Authorization", "Bearer " + authorization);
-		headers.set("Predix-Zone-Id", predixZoneId);
-
-		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-		/*System.out.println(url + "ondemand/locations/" + assetuid + "/media?mediaType=IMAGE&timestamp=" + startts);*/
 		ResponseEntity<mediastep1> m1 = restTemplate.exchange(
-				url + "ondemand/locations/" +  location + "/media?mediaType=VIDEO&timestamp=" + startts, HttpMethod.GET,
-				entity, mediastep1.class);
+				url + "ondemand/locations/" + location + "/media?mediaType=VIDEO&timestamp=" + startts, HttpMethod.GET,
+				getHeaders(), mediastep1.class);
 
 		String url1 = m1.getBody().getPollUrl();
 		System.out.println(m1.getBody().getPollUrl());
-		ResponseEntity<mediastep2> m2 = restTemplate.exchange(url1, HttpMethod.GET, entity, mediastep2.class);
+		ResponseEntity<mediastep2> m2 = restTemplate.exchange(url1, HttpMethod.GET, getHeaders(), mediastep2.class);
 
 		media[] m = m2.getBody().getListOfEntries().getContent();
 
 		List<byte[]> is = new ArrayList<byte[]>();
 
 		for (media x : m) {
-			ResponseEntity<byte[]> i = restTemplate.exchange(x.getUrl(), HttpMethod.GET, entity, byte[].class);
+			ResponseEntity<byte[]> i = restTemplate.exchange(x.getUrl(), HttpMethod.GET, getHeaders(), byte[].class);
 			System.out.println("before printing image");
 			byte[] xe = i.getBody();
 			is.add(xe);
-			 Files.write(Paths.get("video.mp4"), xe);
+			Files.write(Paths.get("video.mp4"), xe);
 			// System.out.println(i);
 		}
 
 		return is;
 
 	}
-	
-	
-	
-	
-	
-	
+
+	public HttpEntity<String> getHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + authorization);
+		headers.set("Predix-Zone-Id", "SD-IE-PARKING");
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+		return entity;
+	}
 
 }

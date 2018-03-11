@@ -1,25 +1,13 @@
-package com.start.Hackathon.model;
+package com.start.Hackathon.model.assets;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class AssetDetails {
+public class asset {
 	
-	@JsonProperty
-	properties properties;
 	String assetUid;
 	String parentAssetUid;
 	String[] eventTypes;
 	String mediaType;
 	String assetType;
 	String coordinates;
-	
-	
-	public properties getProperties() {
-		return properties;
-	}
-	public void setProperties(properties properties) {
-		this.properties = properties;
-	}
 	
 	public String getAssetUid() {
 		return assetUid;
@@ -57,8 +45,6 @@ public class AssetDetails {
 	public void setCoordinates(String coordinates) {
 		this.coordinates = coordinates;
 	}
-	
-	
 	
 	
 

@@ -1,4 +1,4 @@
-package com.start.Hackathon.model;
+package com.start.Hackathon.model.assets;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
