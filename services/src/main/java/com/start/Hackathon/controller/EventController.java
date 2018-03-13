@@ -1,8 +1,13 @@
 package com.start.Hackathon.controller;
 
+import java.awt.Point;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.start.Hackathon.model.assets.locationDetail;
-import com.start.Hackathon.model.events.eventproperties;
+import com.start.Hackathon.model.events.PointCoordinate;
 import com.start.Hackathon.model.events.parkingevent;
 
 @RestController
@@ -35,28 +39,37 @@ public class EventController {
 		this.url = url;
 		this.authorization = authorization;
 		restTemplate = new RestTemplate();
-
 	}
 
 	@RequestMapping(value = "/getparkingbybbox", method = RequestMethod.POST)
-	public ResponseEntity<parkingevent> getparkingbybbox(@RequestParam String x_position,@RequestParam String y_position, @RequestParam String startts,
-			@RequestParam String endts) {
+	public ResponseEntity<parkingevent> getparkingbybbox(@RequestParam String x_position,
+			@RequestParam String y_position, @RequestParam String startts, @RequestParam String endts) {
 
-	
-		
-		System.out.println(url+"locations/events?bbox="+ getcoordinates(x_position,y_position)
-		+ "&locationType=PARKING_ZONE&eventType=PKIN&startTime="+getdateinTimeStamp(startts)
-		+ "&endTime="+getdateinTimeStamp(endts));
-
-		parkingevent pk = restTemplate
-				.exchange(url+"locations/events?bbox="+ getcoordinates(x_position,y_position)
-						+ "&locationType=PARKING_ZONE&eventType=PKIN&startTime="+getdateinTimeStamp(startts)
-						+ "&endTime="+getdateinTimeStamp(endts), HttpMethod.GET, getHeaders(), parkingevent.class)
-				.getBody();
+		parkingevent pk = restTemplate.exchange(url + "locations/events?bbox=" + getcoordinates(x_position, y_position)
+				+ "&locationType=PARKING_ZONE&eventType=PKIN&startTime=" + getdateinTimeStamp(startts) + "&endTime="
+				+ getdateinTimeStamp(endts), HttpMethod.GET, getHeaders(), parkingevent.class).getBody();
 
 		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Access-Control-Allow-Origin","*");
+		responseHeaders.set("Access-Control-Allow-Origin", "*");
 		return new ResponseEntity<parkingevent>(pk, responseHeaders, HttpStatus.CREATED);
+
+	}
+
+	@RequestMapping(value = "/getnearestparking", method = RequestMethod.POST)
+	public ResponseEntity<PointCoordinate> getnearestparking(@RequestParam String x_position, @RequestParam String y_position) {
+
+		parkingevent pk = restTemplate.exchange(url + "locations/events?bbox=" + getcoordinates(x_position, y_position)
+				+ "&locationType=PARKING_ZONE&eventType=PKOUT&startTime=" + getTime_minusFive() + "&endTime="
+				+ Calendar.getInstance().getTimeInMillis(), HttpMethod.GET, getHeaders(), parkingevent.class).getBody();
+
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Access-Control-Allow-Origin", "*");
+
+		PointCoordinate nearest_place = getnearestcoordinate(Float.parseFloat(x_position), Float.parseFloat(y_position), pk);
+
+		//System.out.println(nearest_place.getX());
+
+		return new ResponseEntity<PointCoordinate>(nearest_place, responseHeaders, HttpStatus.CREATED);
 
 	}
 
@@ -80,25 +93,64 @@ public class EventController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		return date;
+	}
+
+	public String getcoordinates(String x_position, String y_position) {
+
+		float x1 = Float.parseFloat(x_position) - 5;
+		float y1 = Float.parseFloat(y_position) - 5;
+		float x2 = Float.parseFloat(x_position) + 5;
+		float y2 = Float.parseFloat(y_position) + 5;
+
+		String bbox = String.valueOf(x1) + ":" + String.valueOf(y1) + "," + String.valueOf(x2) + ":"
+				+ String.valueOf(y2);
+
+		return bbox;
 
 	}
-	
-	public String getcoordinates(String x_position,String y_position) {
-		
-		float x1 = Float.parseFloat(x_position)-1;
-		float y1 = Float.parseFloat(y_position)-1;
-		float x2 = Float.parseFloat(x_position)+1;
-		float y2 = Float.parseFloat(y_position)+1;
-		
-		String bbox =String.valueOf(x1) + ":" +String.valueOf(y1) + ","+
-		String.valueOf(x2) + ":" + String.valueOf(y2);
-		
-		return bbox;
-		
+
+	public String getTime_minusFive() {
+		Calendar now = Calendar.getInstance();
+		String time = String.valueOf(now.getTimeInMillis() - 300000);
+		return time;
 	}
-	
-	
+
+	public PointCoordinate getnearestcoordinate(float x_position, float y_position, parkingevent pk) {
+
+		pk.getContent();
+		List<String> carlocations = new ArrayList<String>();
+
+		if (pk.getContent().length > 0) {
+
+			for (int i = 0; i <= pk.getContent().length - 1; i++) {
+				carlocations.add(pk.getContent()[i].getProperties().getGeoCoordinates());
+			}
+
+			// Point p= new Point();
+			float min_distance = Float.MAX_VALUE;
+			float x_min = Float.MAX_VALUE;
+			float y_min = Float.MAX_VALUE;
+			for (String s : carlocations) {
+				String[] tokens = s.split(",|[:-]+");
+				float x_coordinate = (Float.parseFloat(tokens[0]) + Float.parseFloat(tokens[0])
+						+ Float.parseFloat(tokens[0]) + Float.parseFloat(tokens[0])) / 4;
+				float y_coordinate = (Float.parseFloat(tokens[1]) + Float.parseFloat(tokens[3])
+						+ Float.parseFloat(tokens[5]) + Float.parseFloat(tokens[7])) / 4;
+
+				float temp = (float) (Math.pow(x_coordinate - x_position, 2) + Math.pow(y_coordinate - y_position, 2));
+				if (Math.sqrt(temp) < min_distance) {
+					x_min = x_coordinate;
+					y_min = y_coordinate;
+					min_distance = (float) Math.sqrt(temp);
+				}
+
+			}
+
+			PointCoordinate p = new PointCoordinate(String.valueOf(x_min), String.valueOf(y_min));
+			return p;
+		}
+		return null;
+	}
 
 }
