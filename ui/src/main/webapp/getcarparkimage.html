@@ -19,63 +19,74 @@
 
 
     $(".b").on('click',senddata = ()=>{
-alert("click")
+
       let startts = $('#fromdate').val();
-       let endts = $('#todate').val();
+      let endts = $('#todate').val();
       let geocoder = new google.maps.Geocoder();
 //let latitude = "";
 
-      geocoder.geocode( { 'address': $('#current_position').val()}, function(results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
-         let  latitude = results[0].geometry.location.lat();
-           longitude = results[0].geometry.location.lng();
-       
-           sendrequest(latitude,longitude);
+geocoder.geocode( { 'address': $('#current_position').val()}, function(results, status) {
+  if (status == google.maps.GeocoderStatus.OK) {
+   let  latitude = results[0].geometry.location.lat();
+   longitude = results[0].geometry.location.lng();
 
-        } 
-      }); 
+   sendrequest(latitude,longitude);
 
-      let  sendrequest = (latitude,longitude)=>{
-alert(latitude)
-alert(longitude)
-          $.ajax({
-        type: "POST",
-        dataType: "json",
-        url : "http://localhost:9001/getnearestparking",
+ } 
+}); 
+
+let  sendrequest = (latitude,longitude)=>{
+
+  alert(latitude)
+  alert(longitude)
+  $.ajax({
+    type: "POST",
+    dataType: "json",
+    url : "http://localhost:9001/getmediabyasset",
        // crossDomain:true,
-        data : {
-          "x_position":latitude,
-          "y_position":longitude
-        },
-        success : function(data) {
+       data : {
+         startts:"1520645722510",
+         assetuid:"801be9fc-7bb7-40e7-b810-1d26ea617e89"
+       },
+       success : function(data) {
         /*  if (data.res == "0") {
             alert(data.message);
           } else if (data.res == "1") {*/
+        //    alert("success")
+          //list =   data.content;
             alert("success")
-    
+          data.forEach(item=>{
+  $("#target").attr("src","data:image/gif;base64," + item);
+          })
+        
+        
+        
 
           //  window.location.href = "DisplayLoginFolder";
       //    }
-        },
-         error: function(jqXHR, textStatus, errorThrown){
+    },
+    error: function(jqXHR, textStatus, errorThrown){
     // alert( errorThrown);
-      alert(textStatus);
+    alert(textStatus);
   }
-      });
+});
 
 
-      }
+}
 
-    
-    });
 
-  </script>
+});
+
+</script>
 </head>
 <body>
  <form action="">
 
   Area: <input type="text" name="bbox" id="current_position"/>
+  <p>From Date: <input type="text" id="fromdate" name="fromdate" /></p>
+  <p>To Date: <input type="text" id="todate" name="todate" /></p>
   <input type="button" id="b" onclick="senddata()" value="send">
+  <img id="target" src="" />
 </form>
 
 </body>

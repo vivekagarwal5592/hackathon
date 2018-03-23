@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,9 @@ import org.springframework.web.client.RestTemplate;
 import com.start.Hackathon.model.assets.AssetDetails;
 import com.start.Hackathon.model.assets.asset;
 import com.start.Hackathon.model.assets.contentdetails;
+import com.start.Hackathon.model.assets.location;
 import com.start.Hackathon.model.assets.locationDetail;
+import com.start.Hackathon.model.customModels.parkingDetails;
 import com.start.Hackathon.model.media.media;
 import com.start.Hackathon.model.media.mediastep1;
 import com.start.Hackathon.model.media.mediastep2;
@@ -71,9 +74,17 @@ public class AssetController {
 	@RequestMapping(value = "/getAllLocationswithinbbox", method = RequestMethod.POST)
 	public ResponseEntity<locationDetail> getAllLocations(@RequestParam String bbox) {
 
-		return restTemplate.exchange(
-				url + "locations/search?q=locationType:TRAFFIC_LANE&bbox=" + bbox + "&page=0&size=50", HttpMethod.GET,
+		System.out.println(bbox);
+		System.out.println("I am in getAllLocationswithinbbox");
+		ResponseEntity<locationDetail> locationDetail = restTemplate.exchange(
+				url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50", HttpMethod.GET,
 				getHeaders(), locationDetail.class);
+
+		locationDetail lDetails = locationDetail.getBody();
+
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Access-Control-Allow-Origin", "*");
+		return new ResponseEntity<locationDetail>(lDetails, responseHeaders, HttpStatus.CREATED);
 
 		// return restoperations.getForObject(url,companydetails.class);
 	}
@@ -84,6 +95,20 @@ public class AssetController {
 		return restTemplate.exchange(url + "assets/" + "522de83f-e524-4f76-80f0-463d3815b7a4", HttpMethod.GET,
 				getHeaders(), AssetDetails.class);
 
+		// return restoperations.getForObject(url,companydetails.class);
+	}
+
+	@RequestMapping(value = "/getSingleLocationDetails", method = RequestMethod.POST)
+	public ResponseEntity<location> getallSingleLocationDetails(@RequestParam String locationuid) {
+		
+		System.out.println("I am in getSingleLocationDetails");
+		
+		location l =  restTemplate.exchange(url + "locations/" + locationuid, HttpMethod.GET, getHeaders(), location.class)
+				.getBody();
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Access-Control-Allow-Origin", "*");
+		return new ResponseEntity<location>(l, responseHeaders, HttpStatus.CREATED);
+		
 		// return restoperations.getForObject(url,companydetails.class);
 	}
 

@@ -8,6 +8,13 @@ public class location {
 	String coordinatesType;
 	String coordinates;
 	String name;
+	String city;
+	String state;
+	String country;
+	String zipcode;
+	String timezone;
+	String address;
+	
 
 	public String getLocationUid() {
 		return locationUid;
@@ -56,5 +63,55 @@ public class location {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getZipcode() {
+		return zipcode;
+	}
+
+	public void setZipcode(String zipcode) {
+		this.zipcode = zipcode;
+	}
+
+	public String getTimezone() {
+		return timezone;
+	}
+
+	public void setTimezone(String timezone) {
+		this.timezone = timezone;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
+	
 
 }
