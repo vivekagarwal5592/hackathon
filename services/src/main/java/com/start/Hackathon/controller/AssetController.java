@@ -100,15 +100,15 @@ public class AssetController {
 
 	@RequestMapping(value = "/getSingleLocationDetails", method = RequestMethod.POST)
 	public ResponseEntity<location> getallSingleLocationDetails(@RequestParam String locationuid) {
-		
-		System.out.println("I am in getSingleLocationDetails");
-		
-		location l =  restTemplate.exchange(url + "locations/" + locationuid, HttpMethod.GET, getHeaders(), location.class)
-				.getBody();
+
+		location l = restTemplate
+				.exchange(url + "locations/" + locationuid, HttpMethod.GET, getHeaders(), location.class).getBody();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Access-Control-Allow-Origin", "*");
+		l.setX_coordinate(getXcoordinate(l.getCoordinates()));
+		l.setY_coordinate(getYcoordinate(l.getCoordinates()));
 		return new ResponseEntity<location>(l, responseHeaders, HttpStatus.CREATED);
-		
+
 		// return restoperations.getForObject(url,companydetails.class);
 	}
 
@@ -118,6 +118,24 @@ public class AssetController {
 		headers.set("Predix-Zone-Id", "SD-IE-PARKING");
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 		return entity;
+	}
+	
+	public float getXcoordinate(String s) {
+		
+		String[] tokens = s.split(",|[:]+");
+		float x_coordinate = (Float.parseFloat(tokens[0]) + Float.parseFloat(tokens[2])
+				+ Float.parseFloat(tokens[4]) + Float.parseFloat(tokens[6])) / 4;
+		return x_coordinate;
+		
+	}
+	
+public float getYcoordinate(String s) {
+		
+		String[] tokens = s.split(",|[:]+");
+		float y_coordinate = (Float.parseFloat(tokens[1]) + Float.parseFloat(tokens[3])
+				+ Float.parseFloat(tokens[5]) + Float.parseFloat(tokens[7])) / 4;
+		
+		return y_coordinate;
 	}
 
 }

@@ -18,105 +18,37 @@
    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD337K3FBoUIcvjTAovo91T3gnIHc6wSwc&callback=initMap" ></script>
     <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"> -->
    <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css">
-
+ <script src="js/custom.js"></script>
   <script>
-    $( function() {
-console.log("document starting")
- getlocationcoordinates(getlocationUids);
-  });
-
-    let  getlocationcoordinates = (callback)=> {
-  let geocoder = new google.maps.Geocoder();
-        geocoder.geocode( { 'address': 'sandiego'/*$('#current_position').val() */}, function(results, status) {
-      if (status == google.maps.GeocoderStatus.OK) {
-       let  latitude = results[0].geometry.location.lat();
-         longitude = results[0].geometry.location.lng();
-       callback(latitude,longitude)
-     }
-   });
-  };
-      let  getlocationUids = (latitude,longitude)=> {
-          $.ajax({
-          type: "POST",
-          dataType: "json",
-          url : "http://localhost:9001/getAllLocationswithinbbox",
-          data : {
-            "bbox":parseInt(latitude+2) + ':' + parseInt(longitude+2) + ','+ parseInt(latitude-2) + ':' + parseInt(longitude-2)
-          },
-          success : function(data) {
-            console.log(data)
-            i=0
-            data.content.forEach(item=>{
-               $(".locations").append(`<a onclick='parkingdetails("${item.locationUid}")'>Location ${i} </a><br />`);
-                $(".locations").append(`<a onclick='locationdetails("${item.locationUid}")'>Location ${i} ${i} </a><br />`);
-               i +=1;
-              //  console.log(item.locationUid)
-            })
-          },
-           error: function(jqXHR, textStatus, errorThrown){
-        alert(textStatus);
-        }
-        });
-    }
-
-    let  parkingdetails = (locationUid)=> {
-      $.ajax({
-      type: "POST",
-      dataType: "json",
-      url : "http://localhost:9001/getPKINForLastTendays",
-      data : {
-      parking_loc: locationUid
-      },
-      success : function(data) {
-   $(".parkingdetails").append(`<span class='element1'>Number of violations:${data.timeOverTwoHrs} </span><br />`);
-    $(".parkingdetails").append(`<span class='element2'>Number of Cars spotted:${data.totalNumberOfCars} </span><br />`);
-      },
-       error: function(jqXHR, textStatus, errorThrown){
-    alert(textStatus);
-    }
-    });
-  }
-
-  let  locationdetails = (locationUid)=> {
-    $.ajax({
-    type: "POST",
-    dataType: "json",
-    url : "http://localhost:9001/getSingleLocationDetails",
-    data : {
-    locationuid: locationUid
-    },
-    success : function(data) {
-      console.log(data)
-    },
-     error: function(jqXHR, textStatus, errorThrown){
-  alert(textStatus);
-  }
-  });
-}
 
   </script>
 </head>
 <body>
   <div id="map"></div>
-<script>
-function initMap() {
-  console.log("I am in init")
-     var uluru = {lat: -25.363, lng: 131.044};
-     var map = new google.maps.Map(document.getElementById('map'), {
-       zoom: 4,
-       center: uluru
-     });
-     var marker = new google.maps.Marker({
-       position: uluru,
-       map: map
-     });
-   }
-</script>
-
 <div class="row">
   <div class="col-md-4 locations"></div>
-  <div class="col-md-8 parkingdetails" ></div>
+  <div class="col-md-4 parkingdetails"></div>
+<div class="col-md-4">
+  <select class="city"  onChange="getlocationcoordinates(getlocationUids)">
+  <option value="Balboa Park">Balboa Park</option>
+  <option value="Bankers Hill">Bankers Hill</option>
+  <option value="Barrio Logan">Barrio Logan</option>
+  <option value="Bay Ho">Bay Ho</option>
+  <option value="Bay Park">Bay Park</option>
+  <option value="Birdland">Birdland</option>
+  <option value="Sherman Heights">Sherman Heights</option>
+  <option value="Wooded Area">Wooded Area</option>
+<option value="Sorrento Valley">Sorrento Valley</option>
+<option value="Palm City">Palm City</option>
+
+  Sherman Heights
+  </select>
+  <p>From Date: <input type="text" id="fromdate" name="fromdate" /></p>
+  <p>To Date: <input type="text" id="todate" name="todate" /></p>
+  </div>
 </div>
+
+
 
 
 

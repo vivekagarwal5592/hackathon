@@ -14,6 +14,8 @@ public class location {
 	String zipcode;
 	String timezone;
 	String address;
+	Float x_coordinate;
+	Float y_coordinate;
 	
 
 	public String getLocationUid() {
@@ -111,6 +113,28 @@ public class location {
 	public void setAddress(String address) {
 		this.address = address;
 	}
+
+	public Float getX_coordinate() {
+		return x_coordinate;
+	}
+
+	public void setX_coordinate(Float x_coordinate) {
+		this.x_coordinate = x_coordinate;
+	}
+
+	public Float getY_coordinate() {
+		return y_coordinate;
+	}
+
+	public void setY_coordinate(Float y_coordinate) {
+		this.y_coordinate = y_coordinate;
+	}
+
+	
+
+	
+	
+	
 	
 	
 

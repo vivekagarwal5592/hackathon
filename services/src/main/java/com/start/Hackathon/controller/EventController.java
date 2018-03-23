@@ -87,7 +87,11 @@ public class EventController {
 	}
 
 	@RequestMapping(value = "/getPKINForLastTendays", method = RequestMethod.POST)
-	public ResponseEntity<parkingsummary> getPKINForLastTwoHours(@RequestParam String parking_loc) {
+	public ResponseEntity<parkingsummary> getPKINForLastTwoHours(@RequestParam String parking_loc,
+			@RequestParam String startts, @RequestParam String endts) {
+
+		System.out.println(startts);
+		System.out.println(endts);
 
 		parkingevent pkin = restTemplate.exchange(
 				url + "locations/" + parking_loc + "/events?eventType=PKIN&" + "startTime=" + getTime_minusetendays()
@@ -180,8 +184,8 @@ public class EventController {
 			float y_min = Float.MAX_VALUE;
 			for (String s : carlocations) {
 				String[] tokens = s.split(",|[:-]+");
-				float x_coordinate = (Float.parseFloat(tokens[0]) + Float.parseFloat(tokens[0])
-						+ Float.parseFloat(tokens[0]) + Float.parseFloat(tokens[0])) / 4;
+				float x_coordinate = (Float.parseFloat(tokens[0]) + Float.parseFloat(tokens[2])
+						+ Float.parseFloat(tokens[4]) + Float.parseFloat(tokens[8])) / 4;
 				float y_coordinate = (Float.parseFloat(tokens[1]) + Float.parseFloat(tokens[3])
 						+ Float.parseFloat(tokens[5]) + Float.parseFloat(tokens[7])) / 4;
 
