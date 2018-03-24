@@ -1,8 +1,11 @@
 $( function() {
   $( "#fromdate" ).datepicker();
   $( "#todate" ).datepicker();
+
 //getlocationcoordinates(getlocationUids);
 });
+
+
 
 let  getlocationcoordinates = (callback)=> {
 
@@ -12,7 +15,7 @@ let  getlocationcoordinates = (callback)=> {
   //  console.log(startts)
   //   console.log(endts)
 
-let geocoder = new google.maps.Geocoder;
+ let geocoder = new google.maps.Geocoder;
     geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' /*$('#current_position').val() */}, function(results, status) {
   if (status == google.maps.GeocoderStatus.OK) {
    let  latitude = results[0].geometry.location.lat();
@@ -31,12 +34,12 @@ let geocoder = new google.maps.Geocoder;
 
       },
       success : function(data) {
-        console.log(data)
+      //  console.log(data)
         i=0
-    //       $(".locations").remove()
+           $(".locations").empty()
         data.content.forEach(item=>{
-           $(".locations").append(`<a onclick='parkingdetails("${item.locationUid}")'>Location ${i} </a><br />`);
-        //    $(".locations").append(`<a onclick='locationdetails("${item.locationUid}")'>Location ${i} ${i} </a><br />`);
+           $(".locations").append(`<a onclick='parkingdetails("${item.locationUid}")'>Parking Zone ${i} </a><br />`);
+        //$(".locations").append(`<a onclick='locationdetails("${item.locationUid}")'>Location ${i} ${i} </a><br />`);
            i +=1;
           //  console.log(item.locationUid)
         })
@@ -62,8 +65,10 @@ startts:startts,
 endts:endts
   },
   success : function(data) {
-$(".parkingdetails").append(`<span class='element1'>Number of violations:${data.timeOverTwoHrs} </span><br />`);
-$(".parkingdetails").append(`<span class='element2'>Number of Cars spotted:${data.totalNumberOfCars} </span><br />`);
+
+renderChart(data.numberOfCarsParked)
+$(".parkingdetails").append(`<span id="e1" class='element1'>Number of violations:${data.timeOverTwoHrs} </span><br />`);
+$(".parkingdetails").append(`<span id="e2" class='element2'>Number of Cars spotted:${data.totalNumberOfCars} </span><br />`);
   },
    error: function(jqXHR, textStatus, errorThrown){
 alert(textStatus);
@@ -85,9 +90,14 @@ locationuid: locationUid
 },
 success : function(data) {
 
-console.log(data)
+
 list = getcoordinates(data.coordinates)
+
 changeMapLocation(data.x_coordinate,data.y_coordinate,list)
+getaddressForGeoCode(data.x_coordinate,data.y_coordinate,function(result){
+  $(".parkingdetails").append(`<span id="e2" class='element3'>Address:${result} </span><br />`);
+
+})
 },
  error: function(jqXHR, textStatus, errorThrown){
 alert(textStatus);
@@ -124,13 +134,14 @@ $( "select option:selected" ).each(function() {
 
 
 function changeMapLocation(latitude,longitude,list) {
-
+console.log("I am in change Map location")
 console.log(latitude)
 console.log(longitude)
      var uluru = {lat: latitude, lng: longitude};
      var map = new google.maps.Map(document.getElementById('map'), {
-       zoom: 20,
-       center: uluru
+       zoom: 19,
+       center: uluru,
+       mapTypeId: 'satellite'
      });
 
      // var line = new google.maps.Polyline({
@@ -146,7 +157,6 @@ console.log(longitude)
 
      var marker = new google.maps.Marker({
        position: uluru,
-
      });
 
 marker.setMap(map)
@@ -166,14 +176,9 @@ marker.setMap(map)
        });
 
        flightPath.setMap(map);
-
-
-
-
    }
 
 function initMap() {
-
      var uluru = {lat:33.7157, lng: -117.1611};
      var map = new google.maps.Map(document.getElementById('map'), {
        zoom: 12,
@@ -184,3 +189,61 @@ function initMap() {
        map: map
      });
    }
+
+   let getaddressForGeoCode = (latitude,longitude,callback) => {
+     let geocoder = new google.maps.Geocoder;
+     var latlng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
+         geocoder.geocode( {'location': latlng}, function(results, status) {
+
+       if (status == google.maps.GeocoderStatus.OK) {
+        // console.log()
+  callback(results[0].formatted_address)
+      }
+     });
+   }
+
+
+
+
+   function renderChart(data) {
+
+console.log(data)
+let list = []
+for(key in data){
+  list.push({label:key,y:data[key]})
+}
+
+console.log(list)
+
+
+
+var chart = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "Simple Line Chart"
+	},
+	axisY:{
+		includeZero: false
+	},
+	data: [{
+		type: "line",
+		dataPoints:list
+	}]
+});
+chart.render();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

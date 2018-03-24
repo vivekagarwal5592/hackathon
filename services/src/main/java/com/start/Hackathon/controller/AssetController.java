@@ -74,7 +74,7 @@ public class AssetController {
 	@RequestMapping(value = "/getAllLocationswithinbbox", method = RequestMethod.POST)
 	public ResponseEntity<locationDetail> getAllLocations(@RequestParam String bbox) {
 
-		System.out.println(bbox);
+		
 		System.out.println("I am in getAllLocationswithinbbox");
 		ResponseEntity<locationDetail> locationDetail = restTemplate.exchange(
 				url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50", HttpMethod.GET,

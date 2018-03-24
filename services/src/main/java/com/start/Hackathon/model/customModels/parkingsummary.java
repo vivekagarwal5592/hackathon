@@ -1,9 +1,13 @@
 package com.start.Hackathon.model.customModels;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class parkingsummary {
 	
 	Integer totalNumberOfCars;
 	Integer TimeOverTwoHrs;
+	Map<String,Integer> numberOfCarsParked = new HashMap<>();
 	
 	
 	
@@ -23,6 +27,14 @@ public class parkingsummary {
 	public void setTimeOverTwoHrs(Integer timeOverTwoHrs) {
 		TimeOverTwoHrs = timeOverTwoHrs;
 	}
+	public Map<String, Integer> getNumberOfCarsParked() {
+		return numberOfCarsParked;
+	}
+	public void setNumberOfCarsParked(Map<String, Integer> numberOfCarsParked) {
+		this.numberOfCarsParked = numberOfCarsParked;
+	}
+	
+	
 	
 
 	

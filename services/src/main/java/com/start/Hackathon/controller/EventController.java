@@ -90,19 +90,19 @@ public class EventController {
 	public ResponseEntity<parkingsummary> getPKINForLastTwoHours(@RequestParam String parking_loc,
 			@RequestParam String startts, @RequestParam String endts) {
 
-		System.out.println(startts);
-		System.out.println(endts);
-
+		/*
+		 * System.out.println(startts); System.out.println(endts);
+		 */
 		parkingevent pkin = restTemplate.exchange(
-				url + "locations/" + parking_loc + "/events?eventType=PKIN&" + "startTime=" + getTime_minusetendays()
-						+ "&endTime=" + Calendar.getInstance().getTimeInMillis(),
+				url + "locations/" + parking_loc + "/events?eventType=PKIN&" + "startTime="
+						+ getdateinTimeStamp(startts) + "&endTime=" + getdateinTimeStamp(endts),
 				HttpMethod.GET, getHeaders(), parkingevent.class).getBody();
 
 		List<parkingDetails> objectuids = getobjectuids(pkin);
 
 		parkingevent pkout = restTemplate.exchange(
-				url + "locations/" + parking_loc + "/events?eventType=PKOUT&" + "startTime=" + getTime_minusetendays()
-						+ "&endTime=" + Calendar.getInstance().getTimeInMillis(),
+				url + "locations/" + parking_loc + "/events?eventType=PKOUT&" + "startTime="
+						+ getdateinTimeStamp(startts) + "&endTime=" + getdateinTimeStamp(endts),
 				HttpMethod.GET, getHeaders(), parkingevent.class).getBody();
 
 		objectuids = getparkingoutdetail(pkout, objectuids);
@@ -261,13 +261,28 @@ public class EventController {
 			if (p.getTotaltime() != null) {
 				if (Long.parseLong(p.getTotaltime()) > 7200000) {
 					parkingsummary.setTimeOverTwoHrs(parkingsummary.getTimeOverTwoHrs() + 1);
+
 				}
+
+				if(p.getParkingintimestamp() !=null) {
+					 Date currentDate = new Date(Long.parseLong(p.getParkingintimestamp()));
+					//System.out.println(p.getParkingintimestamp());
+					String d = new SimpleDateFormat("yyyy-MM-dd").format(currentDate).toString();
+					if (parkingsummary.getNumberOfCarsParked().containsKey(d)) {
+						parkingsummary.getNumberOfCarsParked().put(d, parkingsummary.getNumberOfCarsParked().get(d) + 1);
+					}
+					else {
+						parkingsummary.getNumberOfCarsParked().put(d, 1);
+							
+					}
+				}
+				
+				System.out.println(parkingsummary.getNumberOfCarsParked());
+				
+
 			}
 
 		}
-
 		return parkingsummary;
-
 	}
-
 }
