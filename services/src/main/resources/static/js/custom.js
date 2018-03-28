@@ -29,7 +29,7 @@ let  getlocationcoordinates = (callback)=> {
       $.ajax({
       type: "POST",
       dataType: "json",
-      url : "http://localhost:9001/getAllLocationswithinbbox",
+      url : "getAllLocationswithinbbox",
       data : {
         "bbox":parseFloat(latitude+0.1) + ':' + parseFloat(longitude+0.1) + ','+ parseFloat(latitude-0.1) + ':' + parseFloat(longitude-0.1)
 
@@ -59,7 +59,7 @@ let  parkingdetails = (locationUid)=> {
   $.ajax({
   type: "POST",
   dataType: "json",
-  url : "http://localhost:9001/getPKINForLastTendays",
+  url : "getPKINForLastTendays",
   data : {
   parking_loc: locationUid,
 startts:startts,
@@ -89,7 +89,7 @@ let  locationdetails = (locationUid)=> {
 $.ajax({
 type: "POST",
 dataType: "json",
-url : "http://localhost:9001/getSingleLocationDetails",
+url : "getSingleLocationDetails",
 data : {
 locationuid: locationUid
 },

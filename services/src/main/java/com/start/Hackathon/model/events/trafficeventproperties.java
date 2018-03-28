@@ -4,15 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class eventproperties {
-	
+public class trafficeventproperties {
+
 	String locationUid;
 	String assetUid;
 	String eventType;
 	String timestamp;
-	
+
 	@JsonProperty
-	coordinateproperties properties;
+	trafficproperties properties;
+
+	@JsonProperty
+	trafficmeasures measures;
 
 	public String getLocationUid() {
 		return locationUid;
@@ -46,31 +49,20 @@ public class eventproperties {
 		this.timestamp = timestamp;
 	}
 
-	public coordinateproperties getProperties() {
+	public trafficproperties getProperties() {
 		return properties;
 	}
 
-	public void setProperties(coordinateproperties properties) {
+	public void setProperties(trafficproperties properties) {
 		this.properties = properties;
 	}
-	
-	
 
-	
-	/*String speedUnit;
-	String eventUid;
-	String directionUnit;
-	String counter_direction_vehicleType;
-	String vehicletype;
-	
-	String counter_direction;
-	String counter_direction_speed;
-	String counter_direction_vehicleCount;
-	String direction;
-	Float speed;
-	Integer vehicleCount;*/
-	
-	
-	
+	public trafficmeasures getMeasures() {
+		return measures;
+	}
+
+	public void setMeasures(trafficmeasures measures) {
+		this.measures = measures;
+	}
 
 }

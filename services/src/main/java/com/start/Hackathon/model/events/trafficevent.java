@@ -4,18 +4,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class parkingevent {
+public class trafficevent {
 	
 	@JsonProperty
-	parkingeventproperties content[];
+	trafficeventproperties content[];
 
-	public parkingeventproperties[] getContent() {
+
+	public trafficeventproperties[] getContent() {
 		return content;
 	}
 
-	public void setContent(parkingeventproperties[] content) {
+	public void setContent(trafficeventproperties[] content) {
 		this.content = content;
 	}
+
+	
+
+
+
+	
 	
 	
 

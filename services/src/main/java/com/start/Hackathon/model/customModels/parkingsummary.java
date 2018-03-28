@@ -2,12 +2,13 @@ package com.start.Hackathon.model.customModels;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class parkingsummary {
 	
 	Integer totalNumberOfCars;
 	Integer TimeOverTwoHrs;
-	Map<String,Integer> numberOfCarsParked = new HashMap<>();
+	Map<String,Integer> numberOfCarsParked = new TreeMap<>();
 	
 	
 	

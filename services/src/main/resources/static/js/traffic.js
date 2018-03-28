@@ -21,6 +21,8 @@ let  getlocationcoordinates = (callback)=> {
   if (status == google.maps.GeocoderStatus.OK) {
    let  latitude = results[0].geometry.location.lat();
      longitude = results[0].geometry.location.lng();
+
+     //callback function is get locationUids
    callback(latitude,longitude)
  }
 });
@@ -29,7 +31,7 @@ let  getlocationcoordinates = (callback)=> {
       $.ajax({
       type: "POST",
       dataType: "json",
-      url : "http://localhost:9001/getAllLocationswithinbbox",
+      url : "getAllTrafficLocationswithinbbox",
       data : {
         "bbox":parseFloat(latitude+0.1) + ':' + parseFloat(longitude+0.1) + ','+ parseFloat(latitude-0.1) + ':' + parseFloat(longitude-0.1)
 
@@ -39,7 +41,7 @@ let  getlocationcoordinates = (callback)=> {
         i=0
         //   $(".locations").empty()
         data.content.forEach(item=>{
-           $(".locations").append(`<a onclick='parkingdetails("${item.locationUid}")'>Parking Zone ${i} </a><br />`);
+           $(".locations").append(`<a onclick='trafficdetails("${item.locationUid}")'>Traffic Lane ${i} </a><br />`);
         //$(".locations").append(`<a onclick='locationdetails("${item.locationUid}")'>Location ${i} ${i} </a><br />`);
            i +=1;
           //  console.log(item.locationUid)
@@ -51,7 +53,7 @@ let  getlocationcoordinates = (callback)=> {
     });
 }
 
-let  parkingdetails = (locationUid)=> {
+let  trafficdetails = (locationUid)=> {
 
    let startts = $('#fromdate').val();
     let endts = $('#todate').val();
@@ -59,21 +61,22 @@ let  parkingdetails = (locationUid)=> {
   $.ajax({
   type: "POST",
   dataType: "json",
-  url : "http://localhost:9001/getPKINForLastTendays",
+  url : "getTrafficForLastTendays",
   data : {
-  parking_loc: locationUid,
+  traffic_loc: locationUid,
 startts:startts,
 endts:endts
   },
   success : function(data) {
 
+console.log(data)
   //  var element = $(".parkingdetails");//convert string to JQuery element
   //  element.find("span").remove();//remove span elements
   //  var newString = element.html();//get back new string
 
 renderChart(data.numberOfCarsParked)
-$(".parkingdetails").append(`<span id="e1" class='element1'>Number of violations:${data.timeOverTwoHrs} </span><br />`);
-$(".parkingdetails").append(`<span id="e2" class='element2'>Number of Cars spotted:${data.totalNumberOfCars} </span><br />`);
+$(".parkingdetails").append(`<span id="e1" class='element1'>Number of vehicles:${data.noOfVehivles} </span><br />`);
+
   },
    error: function(jqXHR, textStatus, errorThrown){
 alert(textStatus);
@@ -89,7 +92,7 @@ let  locationdetails = (locationUid)=> {
 $.ajax({
 type: "POST",
 dataType: "json",
-url : "http://localhost:9001/getSingleLocationDetails",
+url : "getSingleLocationDetails",
 data : {
 locationuid: locationUid
 },
@@ -146,7 +149,7 @@ console.log(latitude)
 console.log(longitude)
      var uluru = {lat: latitude, lng: longitude};
      var map = new google.maps.Map(document.getElementById('map'), {
-       zoom: 19,
+       zoom: 23,
        center: uluru,
        mapTypeId: 'satellite'
      });
@@ -166,14 +169,9 @@ console.log(longitude)
        position: uluru,
      });
 
-marker.setMap(map)
+//marker.setMap(map)
 
-     var flightPlanCoordinates = [
-         {lat: 37.772, lng: -122.214},
-         {lat: 21.291, lng: -157.821},
-         {lat: -18.142, lng: 178.431},
-         {lat: -27.467, lng: 153.027}
-       ];
+
        var flightPath = new google.maps.Polyline({
          path: list,
          geodesic: true,

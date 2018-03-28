@@ -1,0 +1,22 @@
+.container{
+	margin-top: 10px
+}
+
+a:hover{
+	cursor: pointer;
+}
+
+.locations{
+	
+	text-align:center;
+	font-weight:bold;
+	font-family:helvetica
+}
+
+.about-app{
+	text-align:justify;
+	font-weight:bold;
+	font-family:helvetica
+	color:f8f8f8;
+	margin-top:10px;
+}

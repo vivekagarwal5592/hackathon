@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Datepicker - Default functionality</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+  
+  <script>
+    $( function() {
+      $( "#fromdate" ).datepicker();
+      $( "#todate" ).datepicker();
+    });
+
+
+    $(".b").on('click',senddata = ()=>{
+
+      let startts = $('#fromdate').val();
+      let endts = $('#todate').val();
+      let geocoder = new google.maps.Geocoder();
+//let latitude = "";
+
+geocoder.geocode( { 'address': $('#current_position').val()}, function(results, status) {
+  if (status == google.maps.GeocoderStatus.OK) {
+   let  latitude = results[0].geometry.location.lat();
+   longitude = results[0].geometry.location.lng();
+
+   sendrequest(latitude,longitude);
+
+ } 
+}); 
+
+let  sendrequest = (latitude,longitude)=>{
+
+  alert(latitude)
+  alert(longitude)
+  $.ajax({
+    type: "POST",
+    dataType: "json",
+    url : "http://localhost:9001/getmediabyasset",
+       // crossDomain:true,
+       data : {
+         startts:"1520645722510",
+         assetuid:"801be9fc-7bb7-40e7-b810-1d26ea617e89"
+       },
+       success : function(data) {
+        /*  if (data.res == "0") {
+            alert(data.message);
+          } else if (data.res == "1") {*/
+        //    alert("success")
+          //list =   data.content;
+            alert("success")
+          data.forEach(item=>{
+  $("#target").attr("src","data:image/gif;base64," + item);
+          })
+        
+        
+        
+
+          //  window.location.href = "DisplayLoginFolder";
+      //    }
+    },
+    error: function(jqXHR, textStatus, errorThrown){
+    // alert( errorThrown);
+    alert(textStatus);
+  }
+});
+
+
+}
+
+
+});
+
+</script>
+</head>
+<body>
+ <form action="">
+
+  Area: <input type="text" name="bbox" id="current_position"/>
+  <p>From Date: <input type="text" id="fromdate" name="fromdate" /></p>
+  <p>To Date: <input type="text" id="todate" name="todate" /></p>
+  <input type="button" id="b" onclick="senddata()" value="send">
+  <img id="target" src="" />
+</form>
+
+</body>
+</html>

@@ -55,7 +55,7 @@ public class AssetController {
 
 		return restTemplate.exchange(url
 				+ "assets/search?bbox=33.077762:-117.663817,32.559574:-116.584410&page=0&size=200&q=assetType:CAMERA",
-				HttpMethod.GET, getHeaders(), contentdetails.class);
+				HttpMethod.GET, getParkingHeaders(), contentdetails.class);
 
 		// return restoperations.getForObject(url,companydetails.class);
 	}
@@ -66,25 +66,33 @@ public class AssetController {
 
 		return restTemplate.exchange(
 				url + "assets/search?bbox=" + lattitude + "," + longitude + "&page=0&size=200&q=assetType:CAMERA",
-				HttpMethod.GET, getHeaders(), contentdetails.class);
+				HttpMethod.GET, getParkingHeaders(), contentdetails.class);
 
 		// return restoperations.getForObject(url,companydetails.class);
 	}
 
 	@RequestMapping(value = "/getAllLocationswithinbbox", method = RequestMethod.POST)
-	public ResponseEntity<locationDetail> getAllLocations(@RequestParam String bbox) {
+	public ResponseEntity<locationDetail> getAllParkingLocations(@RequestParam String bbox) {
 
-		
-		System.out.println("I am in getAllLocationswithinbbox");
-		ResponseEntity<locationDetail> locationDetail = restTemplate.exchange(
-				url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50", HttpMethod.GET,
-				getHeaders(), locationDetail.class);
+		locationDetail locationDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getParkingHeaders(), locationDetail.class)
+				.getBody();
 
-		locationDetail lDetails = locationDetail.getBody();
+		return new ResponseEntity<locationDetail>(locationDetail, getResponseHeaders(), HttpStatus.CREATED);
 
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Access-Control-Allow-Origin", "*");
-		return new ResponseEntity<locationDetail>(lDetails, responseHeaders, HttpStatus.CREATED);
+		// return restoperations.getForObject(url,companydetails.class);
+	}
+
+	@RequestMapping(value = "/getAllTrafficLocationswithinbbox", method = RequestMethod.POST)
+	public ResponseEntity<locationDetail> getAllTrafficLocations(@RequestParam String bbox) {
+
+		locationDetail locationDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:TRAFFIC_LANE&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getTrafficHeaders(), locationDetail.class)
+				.getBody();
+
+		return new ResponseEntity<locationDetail>(locationDetail, getResponseHeaders(), HttpStatus.CREATED);
 
 		// return restoperations.getForObject(url,companydetails.class);
 	}
@@ -93,7 +101,7 @@ public class AssetController {
 	public ResponseEntity<AssetDetails> getallSingleAssetDetails(@RequestParam String assetuid) {
 
 		return restTemplate.exchange(url + "assets/" + "522de83f-e524-4f76-80f0-463d3815b7a4", HttpMethod.GET,
-				getHeaders(), AssetDetails.class);
+				getParkingHeaders(), AssetDetails.class);
 
 		// return restoperations.getForObject(url,companydetails.class);
 	}
@@ -102,40 +110,62 @@ public class AssetController {
 	public ResponseEntity<location> getallSingleLocationDetails(@RequestParam String locationuid) {
 
 		location l = restTemplate
-				.exchange(url + "locations/" + locationuid, HttpMethod.GET, getHeaders(), location.class).getBody();
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Access-Control-Allow-Origin", "*");
+				.exchange(url + "locations/" + locationuid, HttpMethod.GET, getParkingHeaders(), location.class)
+				.getBody();
+
 		l.setX_coordinate(getXcoordinate(l.getCoordinates()));
 		l.setY_coordinate(getYcoordinate(l.getCoordinates()));
-		return new ResponseEntity<location>(l, responseHeaders, HttpStatus.CREATED);
+		return new ResponseEntity<location>(l, getResponseHeaders(), HttpStatus.CREATED);
 
-		// return restoperations.getForObject(url,companydetails.class);
 	}
 
-	public HttpEntity<String> getHeaders() {
+	public HttpEntity<String> getParkingHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "Bearer " + authorization);
 		headers.set("Predix-Zone-Id", "SD-IE-PARKING");
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 		return entity;
 	}
-	
-	public float getXcoordinate(String s) {
-		
-		String[] tokens = s.split(",|[:]+");
-		float x_coordinate = (Float.parseFloat(tokens[0]) + Float.parseFloat(tokens[2])
-				+ Float.parseFloat(tokens[4]) + Float.parseFloat(tokens[6])) / 4;
-		return x_coordinate;
-		
+
+	public HttpEntity<String> getTrafficHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + authorization);
+		headers.set("Predix-Zone-Id", "SD-IE-TRAFFIC");
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+		return entity;
 	}
-	
-public float getYcoordinate(String s) {
-		
+
+	public float getXcoordinate(String s) {
 		String[] tokens = s.split(",|[:]+");
-		float y_coordinate = (Float.parseFloat(tokens[1]) + Float.parseFloat(tokens[3])
-				+ Float.parseFloat(tokens[5]) + Float.parseFloat(tokens[7])) / 4;
 		
+		float x_coordinate  =0;
+		for(int i=0;i<=tokens.length-1;i++) {
+			if(i % 2 ==0) {
+				x_coordinate +=Float.parseFloat(tokens[i]);
+			}	
+		}
+		x_coordinate = x_coordinate /(tokens.length/2);
+		return x_coordinate;
+
+	}
+
+	public float getYcoordinate(String s) {
+		String[] tokens = s.split(",|[:]+");
+		float y_coordinate  =0;
+		for(int i=0;i<=tokens.length-1;i++) {
+			if(i % 2 !=0) {
+				y_coordinate +=Float.parseFloat(tokens[i]);
+			}	
+		}
+		y_coordinate = y_coordinate /(tokens.length/2);
 		return y_coordinate;
+	}
+
+	public HttpHeaders getResponseHeaders() {
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Access-Control-Allow-Origin", "*");
+		return responseHeaders;
+
 	}
 
 }
