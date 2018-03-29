@@ -1,11 +1,14 @@
 package com.start.Hackathon.model.customModels;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 public class trafficsummary {
 
 	Integer noOfVehivles;
 	String locationUid;
 	String locationcoordinates;
-	
+	Map<String,Integer> numberOfCarsSpotted = new TreeMap<>();
 	
 	
 	public trafficsummary() {
@@ -30,6 +33,14 @@ public class trafficsummary {
 	public void setLocationcoordinates(String locationcoordinates) {
 		this.locationcoordinates = locationcoordinates;
 	}
+	public Map<String, Integer> getNumberOfCarsSpotted() {
+		return numberOfCarsSpotted;
+	}
+	public void setNumberOfCarsSpotted(Map<String, Integer> numberOfCarsSpotted) {
+		this.numberOfCarsSpotted = numberOfCarsSpotted;
+	}
+	
+	
 	
 	
 	

@@ -15,19 +15,19 @@ public class traffic {
 
 	@GetMapping("/getparkinganalysis")
 	public String getparkinganalysis() {
-		System.out.println("In pa");
+		//System.out.println("In pa");
 		return "getparkinganalysis.html";
 	}
 
 	@GetMapping("/gettrafficanalysis")
 	public String gettrafficanalysis() {
-		System.out.println("In pa");
+	//	System.out.println("In pa");
 		return "gettrafficanalysis.html";
 	}
 
 	@GetMapping("/currentlocation")
 	public String currentlocation() {
-		System.out.println("In pa");
+	//	System.out.println("In pa");
 		return "currentlocation.html";
 	}
 

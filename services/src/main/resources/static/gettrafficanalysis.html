@@ -16,20 +16,21 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<link rel="stylesheet" href="custom.css">
+
+<link rel="stylesheet" href="css/custom.css">
 
 <script async defer
 	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD337K3FBoUIcvjTAovo91T3gnIHc6wSwc&callback=initMap"></script>
 <script src="js/traffic.js"></script>
+
 <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"> -->
 
 
 <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css">
 
-<script>
-	
-</script>
+
+
 </head>
 <body>
 	<div class="container">
@@ -43,9 +44,10 @@
 						<a class="navbar-brand" href="#">WebSiteName</a>
 					</div>
 					<ul class="nav navbar-nav">
-						<li ><a href="/">Home</a></li>
-						<li ><a href="getparkinganalysis">Parking Analysis</a></li>
-						<li class="active"><a href="gettrafficanalysis">Traffic Analysis</a></li>
+						<li><a href="/">Home</a></li>
+						<li><a href="getparkinganalysis">Traffic Analysis</a></li>
+						<li class="active"><a href="gettrafficanalysis">Traffic
+								Analysis</a></li>
 						<li><a href="currentlocation">Get Nearest Parking</a></li>
 					</ul>
 				</div>
@@ -75,15 +77,31 @@
 					</select> <label for="fromdate">From</label> <input type="text"
 						class="form-control" id="fromdate" name="fromdate" /> <label
 						for="todate">To</label> <input type="text" class="form-control"
-						id="todate" name="todate" />
+						id="todate" name="todate" /> 
+						
+						<label for="fromtime">From</label>
+						<select  id="fromtime" class=" form-control">
+						<option value="12:00 AM">12:00 PM</option>
+						<option value="12:15 AM">12:15 AM</option>
+					</select>
+					
+					<label for="totime">To</label>
+					<select id="totime" class="time form-control">
+						<option value="12:00 AM">12:00 AM</option>
+						<option value="12:15 AM">3:15 PM</option>
+					</select>
+
+
 
 				</div>
 
-				<div id="chartContainer" style="height: 300px; width: 100%;"></div>
-
-
 			</div>
+
+			<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+
 		</div>
+	</div>
 
 
 

@@ -1,20 +1,12 @@
 ---
-#
-#  Manifest.yml for a basic hello world index.html file
-#  This application and steps to deploy are described in full in the getting started guide on predix.io
-#
-#  Step 1 is to change your application name, save, exit, and cf push
-#  Step 2 - In later tutorials you will be shown how to **bind** to Predix services as described on predix.io
-
 applications:
-  - name: ParkingSpace # Step 1: Change your application name
-    buildpack: staticfile_buildpack 
-    memory: 256M
+  - name: parkingspace
+    buildpack: java_buildpack
+    path: target/Hackathon-Services-0.0.1-SNAPSHOT.war
+    memory: 512M
+    timeout : 180
 
-    # Later, to Bind to services, uncomment the section below and enter the service name that you gave, e.g.
-    #services:
-    # - my_redis_instance # change this to your redis service instance name
-
-    # You may set environment variables that your code will read in, e.g.
-    #env:
-    #  MY_ENV_VARIABLE: my-value
+env:
+   SPRING_PROFILES_ACTIVE : cloud
+   MEMORY_LIMIT: 358M
+   JAVA_DOCS_URL : https://github.com/vivekagarwal5592/hackathon

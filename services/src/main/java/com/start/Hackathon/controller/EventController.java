@@ -159,7 +159,6 @@ public class EventController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "Bearer " + authorization);
 		headers.set("Predix-Zone-Id", "SD-IE-TRAFFIC");
-		// headers.set("Access-Control-Allow-Origin", "*");
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 		return entity;
 	}
@@ -167,6 +166,20 @@ public class EventController {
 	public String getdateinTimeStamp(String date) {
 
 		SimpleDateFormat d = new SimpleDateFormat("MM/dd/yyyy");
+
+		try {
+			date = String.valueOf(d.parse(date).getTime());
+			// System.out.println(date);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return date;
+	}
+	
+	public String getTimeinTimeStamp(String date) {
+
+		SimpleDateFormat d = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
 
 		try {
 			date = String.valueOf(d.parse(date).getTime());
@@ -318,7 +331,22 @@ public class EventController {
 
 		for (int i = 0; i <= traffic.getContent().length - 1; i++) {
 			t.setNoOfVehivles(t.getNoOfVehivles() + traffic.getContent()[i].getMeasures().getVehicleCount());
+
+			if (traffic.getContent()[i].getTimestamp() != null) {
+				Date currentDate = new Date(Long.parseLong(traffic.getContent()[i].getTimestamp()));
+				String d = new SimpleDateFormat("yyyy-MM-dd").format(currentDate).toString();
+				System.out.println(d);
+				if (t.getNumberOfCarsSpotted().containsKey(d)) {
+					t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d) + 1);
+				} else {
+					t.getNumberOfCarsSpotted().put(d, 1);
+				}
+
+			}
+
 		}
+
+		System.out.println(t.getNumberOfCarsSpotted().keySet());
 
 		return t;
 

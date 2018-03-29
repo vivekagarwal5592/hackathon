@@ -10,8 +10,6 @@ public class parkingsummary {
 	Integer TimeOverTwoHrs;
 	Map<String,Integer> numberOfCarsParked = new TreeMap<>();
 	
-	
-	
 	public parkingsummary() {
 		super();
 		TimeOverTwoHrs =0;

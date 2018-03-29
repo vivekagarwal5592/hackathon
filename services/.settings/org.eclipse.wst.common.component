@@ -6,6 +6,6 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <property name="context-root" value="Hackathon-Services"/>
         <property name="java-output-path" value="/Hackathon-Services/target/classes"/>
-        <property name="component.exclusion.patterns" value="**/activation*.jar,**/ant*.jar,**/java*.jar"/>
+        <property name="component.exclusion.patterns"/>
     </wb-module>
 </project-modules>

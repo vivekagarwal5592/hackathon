@@ -2,8 +2,11 @@ $( function() {
   $( "#fromdate" ).datepicker();
   $( "#todate" ).datepicker();
 
- //$('#datetimepicker1').datetimepicker();
-//getlocationcoordinates(getlocationUids);
+
+// getlocationcoordinates(getlocationUids);
+  
+  
+  
 });
 
 
@@ -11,18 +14,18 @@ $( function() {
 let  getlocationcoordinates = (callback)=> {
 
   // let startts = $('#fromdate').val();
-  //  let endts = $('#todate').val();
+  // let endts = $('#todate').val();
   //
-  //  console.log(startts)
-  //   console.log(endts)
+  // console.log(startts)
+  // console.log(endts)
 
  let geocoder = new google.maps.Geocoder;
-    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' /*$('#current_position').val() */}, function(results, status) {
+    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' /* $('#current_position').val() */}, function(results, status) {
   if (status == google.maps.GeocoderStatus.OK) {
    let  latitude = results[0].geometry.location.lat();
      longitude = results[0].geometry.location.lng();
 
-     //callback function is get locationUids
+     // callback function is get locationUids
    callback(latitude,longitude)
  }
 });
@@ -37,14 +40,16 @@ let  getlocationcoordinates = (callback)=> {
 
       },
       success : function(data) {
-      //  console.log(data)
+      // console.log(data)
         i=0
-        //   $(".locations").empty()
+        // $(".locations").empty()
         data.content.forEach(item=>{
            $(".locations").append(`<a onclick='trafficdetails("${item.locationUid}")'>Traffic Lane ${i} </a><br />`);
-        //$(".locations").append(`<a onclick='locationdetails("${item.locationUid}")'>Location ${i} ${i} </a><br />`);
+        // $(".locations").append(`<a
+		// onclick='locationdetails("${item.locationUid}")'>Location ${i} ${i}
+		// </a><br />`);
            i +=1;
-          //  console.log(item.locationUid)
+          // console.log(item.locationUid)
         })
       },
        error: function(jqXHR, textStatus, errorThrown){
@@ -55,8 +60,8 @@ let  getlocationcoordinates = (callback)=> {
 
 let  trafficdetails = (locationUid)=> {
 
-   let startts = $('#fromdate').val();
-    let endts = $('#todate').val();
+   let startts = $('#fromdate').val() + " "+ $('#fromtime').val() ;
+    let endts = $('#todate').val() + " " +  $('#totime').val() ;
 
   $.ajax({
   type: "POST",
@@ -70,11 +75,11 @@ endts:endts
   success : function(data) {
 
 console.log(data)
-  //  var element = $(".parkingdetails");//convert string to JQuery element
-  //  element.find("span").remove();//remove span elements
-  //  var newString = element.html();//get back new string
+  // var element = $(".parkingdetails");//convert string to JQuery element
+  // element.find("span").remove();//remove span elements
+  // var newString = element.html();//get back new string
 
-renderChart(data.numberOfCarsParked)
+renderChart(data.numberOfCarsSpotted)
 $(".parkingdetails").append(`<span id="e1" class='element1'>Number of vehicles:${data.noOfVehivles} </span><br />`);
 
   },
@@ -127,7 +132,7 @@ let list = []
    list.push({lat:parseFloat(val[0]),lng:parseFloat(val[1])})
  })
 
-//console.log(list)
+// console.log(list)
 return list;
 }
 
@@ -155,21 +160,22 @@ console.log(longitude)
      });
 
      // var line = new google.maps.Polyline({
-     //     path: [new google.maps.LatLng(latitude+1,longitude+1), new google.maps.LatLng(latitude-10,longitude-10)],
-     //     strokeColor: "#FF0000",
-     //     strokeOpacity: 1.0,
-     //     strokeWeight: 10,
-     //  //   geodesic: true,
-     //  //   map: map
+     // path: [new google.maps.LatLng(latitude+1,longitude+1), new
+		// google.maps.LatLng(latitude-10,longitude-10)],
+     // strokeColor: "#FF0000",
+     // strokeOpacity: 1.0,
+     // strokeWeight: 10,
+     // // geodesic: true,
+     // // map: map
      // });
      //
-     //   line.setMap(map);
+     // line.setMap(map);
 
      var marker = new google.maps.Marker({
        position: uluru,
      });
 
-//marker.setMap(map)
+// marker.setMap(map)
 
 
        var flightPath = new google.maps.Polyline({
