@@ -74,27 +74,31 @@ public class AssetController {
 	@RequestMapping(value = "/getAllLocationswithinbbox", method = RequestMethod.POST)
 	public ResponseEntity<locationDetail> getAllParkingLocations(@RequestParam String bbox) {
 
-		locationDetail locationDetail = restTemplate
-				.exchange(url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50",
-						HttpMethod.GET, getParkingHeaders(), locationDetail.class)
-				.getBody();
+		try {
+			locationDetail locationDetail = restTemplate
+					.exchange(url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50",
+							HttpMethod.GET, getParkingHeaders(), locationDetail.class)
+					.getBody();
 
-		return new ResponseEntity<locationDetail>(locationDetail, getResponseHeaders(), HttpStatus.CREATED);
+			return new ResponseEntity<locationDetail>(locationDetail, getResponseHeaders(), HttpStatus.CREATED);
+		} catch (Exception e) {
+			return null;
+		}
 
-		// return restoperations.getForObject(url,companydetails.class);
 	}
 
 	@RequestMapping(value = "/getAllTrafficLocationswithinbbox", method = RequestMethod.POST)
 	public ResponseEntity<locationDetail> getAllTrafficLocations(@RequestParam String bbox) {
 
-		locationDetail locationDetail = restTemplate
-				.exchange(url + "locations/search?q=locationType:TRAFFIC_LANE&bbox=" + bbox + "&page=0&size=50",
-						HttpMethod.GET, getTrafficHeaders(), locationDetail.class)
-				.getBody();
-
-		return new ResponseEntity<locationDetail>(locationDetail, getResponseHeaders(), HttpStatus.CREATED);
-
-		// return restoperations.getForObject(url,companydetails.class);
+		try {
+			locationDetail locationDetail = restTemplate
+					.exchange(url + "locations/search?q=locationType:TRAFFIC_LANE&bbox=" + bbox + "&page=0&size=50",
+							HttpMethod.GET, getTrafficHeaders(), locationDetail.class)
+					.getBody();
+			return new ResponseEntity<locationDetail>(locationDetail, getResponseHeaders(), HttpStatus.CREATED);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	@RequestMapping(value = "/getSingleAssetDetails", method = RequestMethod.POST)
@@ -102,8 +106,6 @@ public class AssetController {
 
 		return restTemplate.exchange(url + "assets/" + "522de83f-e524-4f76-80f0-463d3815b7a4", HttpMethod.GET,
 				getParkingHeaders(), AssetDetails.class);
-
-		// return restoperations.getForObject(url,companydetails.class);
 	}
 
 	@RequestMapping(value = "/getSingleLocationDetails", method = RequestMethod.POST)
@@ -137,27 +139,27 @@ public class AssetController {
 
 	public float getXcoordinate(String s) {
 		String[] tokens = s.split(",|[:]+");
-		
-		float x_coordinate  =0;
-		for(int i=0;i<=tokens.length-1;i++) {
-			if(i % 2 ==0) {
-				x_coordinate +=Float.parseFloat(tokens[i]);
-			}	
+
+		float x_coordinate = 0;
+		for (int i = 0; i <= tokens.length - 1; i++) {
+			if (i % 2 == 0) {
+				x_coordinate += Float.parseFloat(tokens[i]);
+			}
 		}
-		x_coordinate = x_coordinate /(tokens.length/2);
+		x_coordinate = x_coordinate / (tokens.length / 2);
 		return x_coordinate;
 
 	}
 
 	public float getYcoordinate(String s) {
 		String[] tokens = s.split(",|[:]+");
-		float y_coordinate  =0;
-		for(int i=0;i<=tokens.length-1;i++) {
-			if(i % 2 !=0) {
-				y_coordinate +=Float.parseFloat(tokens[i]);
-			}	
+		float y_coordinate = 0;
+		for (int i = 0; i <= tokens.length - 1; i++) {
+			if (i % 2 != 0) {
+				y_coordinate += Float.parseFloat(tokens[i]);
+			}
 		}
-		y_coordinate = y_coordinate /(tokens.length/2);
+		y_coordinate = y_coordinate / (tokens.length / 2);
 		return y_coordinate;
 	}
 

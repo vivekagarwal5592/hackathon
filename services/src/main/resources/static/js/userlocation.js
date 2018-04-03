@@ -1,16 +1,46 @@
 window.onload = function() {
-  var startPos;
-  var geoOptions = {
-     timeout: 10 * 1000
-  }
+// var startPos;
+ 
 
-  var geoSuccess = function(position) {
-    startPos = position;
-    console.log(position)
-    console.log(startPos.coords.latitude)
-      console.log(startPos.coords.longitude)
+ 
+
+ 
+};
+
+var geoOptions = {
+	     timeout: 10 * 1000
+	  }
+
+let getcurrentPosition = () =>{
+	 navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
+}
+
+
+
+
+let  getlocationcoordinates = (callback)=> {
+	console.log("I am here")
+	 let geocoder = new google.maps.Geocoder;
+	    geocoder.geocode( { 'address': $( "#locationName" ).val()}, function(results, status) {
+	  if (status == google.maps.GeocoderStatus.OK) {
+	   let  latitude = results[0].geometry.location.lat();
+	     longitude = results[0].geometry.location.lng();
+
+	  // markarea(latitude,longitude)
+	   callback(latitude,longitude)
+	 }
+	});
+	};
+
+var geoSuccess = function(position) {
+    var startPos = position;
+  /*
+	 * console.log(position) console.log(startPos.coords.latitude)
+	 * console.log(startPos.coords.longitude)
+	 */
       getlocationUids(startPos.coords.latitude,startPos.coords.longitude)
   };
+  
   var geoError = function(error) {
     console.log('Error occurred. Error code: ' + error.code);
     // error.code can be:
@@ -20,20 +50,21 @@ window.onload = function() {
     // 3: timed out
   };
 
-  navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
-};
-
 
 
 let  getlocationUids = (latitude,longitude)=> {
-  latitude= 32.715736
-  longitude = -117.161087
+	console.log(latitude)
+	console.log(longitude)
+	console.log(parseFloat(latitude+0.008))
+	console.log( parseFloat(longitude+0.008))
+  // latitude= 32.719736
+  // longitude = -117.162087
     $.ajax({
     type: "POST",
     dataType: "json",
-    url : "getAllLocationswithinbbox",
+    url : "getAllTrafficLocationswithinbbox",
     data : {
-      "bbox":parseFloat(latitude+0.05) + ':' + parseFloat(longitude+0.05) + ','+ parseFloat(latitude-0.05) + ':' + parseFloat(longitude-0.05)
+      "bbox":parseFloat(latitude+0.008) + ':' + parseFloat(longitude+0.008) + ','+ parseFloat(latitude-0.008) + ':' + parseFloat(longitude-0.008)
     },
     success : function(data) {
   // console.log(data);
@@ -55,25 +86,31 @@ let  getNearestParking = (latitude,longitude,data)=> {
      locations.push(items.locationUid)
 });
 
+  locationdetails = JSON.stringify(locations)
+  
     $.ajax({
     type: "POST",
-    dataType: "json",
+   dataType: "json",
+    cache: false,
     url : "getnearestparking",
-    data :{
-          locationdetails:locations
-        },
-        contentType:"application/json; charset=utf-8",
+    data :locationdetails,
+    	
+    contentType:"application/json; charset=utf-8",
     success : function(d) {
 console.log(d)
 
-// changeMapLocation(latitude,longitude,coordinates)
+d.forEach(item=>{
+	coordinates.push({lat:parseFloat(item.x),lng:parseFloat(item.y)})
+})
+
+ changeMapLocation(latitude,longitude,coordinates)
 
     },
      error: function(jqXHR, textStatus, errorThrown){
     	 console.log(errorThrown)
   alert(textStatus);
-  alert(errorThrown)
-console.log(errorThrown)
+// alert(errorThrown)
+console.log(jqXHR.responseText)
   }
   });
 
@@ -102,12 +139,15 @@ console.log("I am in change Map location")
 
      var marker = new google.maps.Marker({
        position: uluru,
+     // icon: 'marker.png',
        map:map
+       
      });
 
-
+//console.log("Size of list is "+l.length)
 
 l.forEach(item=>{
+	console.log(" I am in foreach")
   var marker = new google.maps.Marker({
     position: item,
     map:map

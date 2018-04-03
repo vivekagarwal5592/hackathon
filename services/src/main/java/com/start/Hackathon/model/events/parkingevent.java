@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class parkingevent {
-	
+
 	@JsonProperty
 	parkingeventproperties content[];
 
@@ -16,7 +16,5 @@ public class parkingevent {
 	public void setContent(parkingeventproperties[] content) {
 		this.content = content;
 	}
-	
-	
 
 }

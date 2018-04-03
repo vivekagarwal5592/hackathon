@@ -30,8 +30,49 @@
 </head>
 <body>
 
-	<div id="map"></div>
+	<div class="container">
+		<div class="row">
 
-	
+
+
+
+			<nav class="navbar navbar-default">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<a class="navbar-brand" href="/">San Diego Smart Analysis</a>
+					</div>
+					<ul class="nav navbar-nav">
+						<li><a href="/">Home</a></li>
+						<li><a href="getparkinganalysis">Parking Analysis</a></li>
+						<li><a href="gettrafficanalysis">Traffic Analysis</a></li>
+						<li><a href="locationanalysis">Location Analysis</a></li>
+						<li class="active"><a href="currentlocation">Get Nearest
+								Parking</a></li>
+					</ul>
+				</div>
+			</nav>
+
+		</div>
+
+		<div class="row">
+
+
+			<div class="col-md-4">
+
+				<input type="text" id="locationName" class="form-control" placeholder="Location name" style="margin-bottom:7px"/>
+
+				<button type="button" class="btn btn-info " style="margin-bottom:7px" onclick="getlocationcoordinates(getlocationUids)">Get Parking
+					from Entered Location</button>
+
+				<button type="button" class="btn btn-info"
+					onclick="getcurrentPosition()">Get Parking from Current
+					Location</button>
+
+			</div>
+			<div class="col-md-8">
+				<div id="map"></div>
+			</div>
+		</div>
+	</div>
 </body>
 </html>

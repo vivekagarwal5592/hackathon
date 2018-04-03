@@ -29,12 +29,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.start.Hackathon.model.assets.location;
 import com.start.Hackathon.model.assets.locationDetail;
+import com.start.Hackathon.model.customModels.locationsummary;
 import com.start.Hackathon.model.customModels.parkingDetails;
 import com.start.Hackathon.model.customModels.parkingsummary;
 import com.start.Hackathon.model.customModels.trafficsummary;
 import com.start.Hackathon.model.events.PointCoordinate;
-import com.start.Hackathon.model.events.locationid;
 import com.start.Hackathon.model.events.parkingevent;
 import com.start.Hackathon.model.events.trafficevent;
 
@@ -69,28 +70,26 @@ public class EventController {
 	}
 
 	@RequestMapping(value = "/getnearestparking", method = RequestMethod.POST)
-	public ResponseEntity<List<PointCoordinate>> getnearestparking(@RequestParam String locationdetails) {
-
-		// locationDetail locationdetails = new locationDetail ();
-		System.out.println("I am inside getnearestparking");
-		// System.out.println("Length is" +locationdetails.length);
+	public ResponseEntity<List<PointCoordinate>> getnearestparking(@RequestBody String[] locationdetails) {
 
 		List<PointCoordinate> location_coordinates = new ArrayList<PointCoordinate>();
 
-		parkingevent pkout = restTemplate.exchange(
-				url + "locations/" + locationdetails + "/events?eventType=PKOUT&" + "startTime=" + getTime_minusFive()
-						+ "&endTime=" + Calendar.getInstance().getTimeInMillis(),
-				HttpMethod.GET, getParkingHeaders(), parkingevent.class).getBody();
+		for (String j : locationdetails) {
 
-		// location_coordinates.add();
+			parkingevent pkout = restTemplate.exchange(
+					url + "locations/" + j + "/events?eventType=PKOUT&" + "startTime=" + getTime_minusFive()
+							+ "&endTime=" + Calendar.getInstance().getTimeInMillis(),
+					HttpMethod.GET, getParkingHeaders(), parkingevent.class).getBody();
 
-		for (int i = 0; i <= pkout.getContent().length - 1; i++) {
-			location_coordinates.add(new PointCoordinate(
-					String.valueOf(getXcoordinate(pkout.getContent()[i].getProperties().getGeoCoordinates())),
-					String.valueOf(getYcoordinate(
-							String.valueOf(pkout.getContent()[i].getProperties().getGeoCoordinates())))));
+			// location_coordinates.add();
+
+			for (int i = 0; i <= pkout.getContent().length - 1; i++) {
+				location_coordinates.add(new PointCoordinate(
+						String.valueOf(getXcoordinate(pkout.getContent()[i].getProperties().getGeoCoordinates())),
+						String.valueOf(getYcoordinate(
+								String.valueOf(pkout.getContent()[i].getProperties().getGeoCoordinates())))));
+			}
 		}
-
 		/*
 		 * System.out.println("X position "+nearest_place.getX());
 		 * System.out.println("X position "+nearest_place.getY());
@@ -102,27 +101,67 @@ public class EventController {
 	}
 
 	@RequestMapping(value = "/getPKINForLastTendays", method = RequestMethod.POST)
-	public ResponseEntity<parkingsummary> getPKINForLastTwoHours(@RequestParam String parking_loc,
+	public ResponseEntity<parkingsummary> getPKINForLastTendays(@RequestParam String parking_loc,
 			@RequestParam String startts, @RequestParam String endts) {
 
-		parkingevent pkin = restTemplate.exchange(
-				url + "locations/" + parking_loc + "/events?eventType=PKIN&" + "startTime="
-						+ getdateinTimeStamp(startts) + "&endTime=" + getdateinTimeStamp(endts),
-				HttpMethod.GET, getParkingHeaders(), parkingevent.class).getBody();
+		try {
+			parkingevent pkin = restTemplate.exchange(
+					url + "locations/" + parking_loc + "/events?eventType=PKIN&" + "startTime="
+							+ getdateinTimeStamp(startts) + "&endTime=" + getdateinTimeStamp(endts),
+					HttpMethod.GET, getParkingHeaders(), parkingevent.class).getBody();
 
-		List<parkingDetails> objectuids = getobjectuids(pkin);
+			List<parkingDetails> objectuids = getobjectuids(pkin);
 
-		parkingevent pkout = restTemplate.exchange(
-				url + "locations/" + parking_loc + "/events?eventType=PKOUT&" + "startTime="
-						+ getdateinTimeStamp(startts) + "&endTime=" + getdateinTimeStamp(endts),
-				HttpMethod.GET, getParkingHeaders(), parkingevent.class).getBody();
+			parkingevent pkout = restTemplate.exchange(
+					url + "locations/" + parking_loc + "/events?eventType=PKOUT&" + "startTime="
+							+ getdateinTimeStamp(startts) + "&endTime=" + getdateinTimeStamp(endts),
+					HttpMethod.GET, getParkingHeaders(), parkingevent.class).getBody();
 
-		objectuids = getparkingoutdetail(pkout, objectuids);
+			objectuids = getparkingoutdetail(pkout, objectuids);
 
-		parkingsummary ps = getparkingSummary(objectuids);
+			parkingsummary ps = getparkingSummary(objectuids);
 
-		return new ResponseEntity<parkingsummary>(ps, getResponseHeaders(), HttpStatus.CREATED);
+			return new ResponseEntity<parkingsummary>(ps, getResponseHeaders(), HttpStatus.CREATED);
+		} catch (Exception e) {
+			return null;
+		}
+	}
 
+	@RequestMapping(value = "/getlocationsummary", method = RequestMethod.POST)
+	public ResponseEntity<locationsummary> getlocationsummary(@RequestParam String startts, @RequestParam String endts,
+			@RequestParam String bbox) {
+
+		String url = "https://ic-metadata-service-sdhack.run.aws-usw02-pr.ice.predix.io/v2/metadata/";
+		locationDetail parkingDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getParkingHeaders(), locationDetail.class)
+				.getBody();
+
+		locationDetail trafficDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:TRAFFIC_LANE&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getTrafficHeaders(), locationDetail.class)
+				.getBody();
+
+		List<trafficsummary> tsummary = new ArrayList<trafficsummary>();
+		for (location l : trafficDetail.getContent()) {
+			trafficsummary t = getTrafficForLastTenDays(l.getLocationUid(), startts, endts).getBody();
+			if (t != null) {
+				tsummary.add(t);
+				(tsummary.get(tsummary.size() - 1)).setLocationcoordinates(l.getCoordinates());
+			}
+		}
+
+		List<parkingsummary> psummary = new ArrayList<parkingsummary>();
+		for (location l : parkingDetail.getContent()) {
+			psummary.add(getPKINForLastTendays(l.getLocationUid(), startts, endts).getBody());
+		}
+
+		locationsummary lsummary = getLocationSummary(tsummary, psummary);
+
+		return new ResponseEntity<locationsummary>(lsummary, getResponseHeaders(), HttpStatus.CREATED);
+
+		// return restoperations.getForObject(url,companydetails.class);
+		// return ;
 	}
 
 	@RequestMapping(value = "/getTrafficForLastTendays", method = RequestMethod.POST)
@@ -176,7 +215,7 @@ public class EventController {
 		}
 		return date;
 	}
-	
+
 	public String getTimeinTimeStamp(String date) {
 
 		SimpleDateFormat d = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
@@ -258,10 +297,16 @@ public class EventController {
 	}
 
 	public List<parkingDetails> getobjectuids(parkingevent pe) {
+
+		if (pe.getContent().length > 0) {
+			pe.getContent()[0].getProperties().getGeoCoordinates();
+		}
+
 		List<parkingDetails> objectDetails = new ArrayList<parkingDetails>();
 		for (int i = 0; i <= pe.getContent().length - 1; i++) {
 			objectDetails.add(new parkingDetails(pe.getContent()[i].getLocationUid(), pe.getContent()[i].getAssetUid(),
-					pe.getContent()[i].getTimestamp(), pe.getContent()[i].getProperties().getObjectUid()));
+					pe.getContent()[i].getTimestamp(), pe.getContent()[i].getProperties().getObjectUid(),
+					pe.getContent()[i].getProperties().getGeoCoordinates()));
 		}
 		return objectDetails;
 	}
@@ -296,6 +341,9 @@ public class EventController {
 
 		parkingsummary parkingsummary = new parkingsummary();
 		parkingsummary.setTotalNumberOfCars(objectuids.size());
+		if (objectuids.size() > 0) {
+			parkingsummary.setLocationcoordinates(objectuids.get(0).getCoordinates());
+		}
 
 		for (parkingDetails p : objectuids) {
 			if (p.getTotaltime() != null) {
@@ -325,31 +373,28 @@ public class EventController {
 	public trafficsummary getTrafficSummary(trafficevent traffic) {
 
 		trafficsummary t = new trafficsummary();
-		t.setLocationUid(traffic.getContent()[0].getLocationUid());
+		if (traffic.getContent().length > 0) {
 
-		System.out.println(traffic.getContent().length);
+			t.setLocationUid(traffic.getContent()[0].getLocationUid());
 
-		for (int i = 0; i <= traffic.getContent().length - 1; i++) {
-			t.setNoOfVehivles(t.getNoOfVehivles() + traffic.getContent()[i].getMeasures().getVehicleCount());
+			for (int i = 0; i <= traffic.getContent().length - 1; i++) {
+				t.setNoOfVehivles(t.getNoOfVehivles() + traffic.getContent()[i].getMeasures().getVehicleCount());
 
-			if (traffic.getContent()[i].getTimestamp() != null) {
-				Date currentDate = new Date(Long.parseLong(traffic.getContent()[i].getTimestamp()));
-				String d = new SimpleDateFormat("yyyy-MM-dd").format(currentDate).toString();
-				System.out.println(d);
-				if (t.getNumberOfCarsSpotted().containsKey(d)) {
-					t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d) + 1);
-				} else {
-					t.getNumberOfCarsSpotted().put(d, 1);
+				if (traffic.getContent()[i].getTimestamp() != null) {
+					Date currentDate = new Date(Long.parseLong(traffic.getContent()[i].getTimestamp()));
+					String d = new SimpleDateFormat("dd-hh a").format(currentDate).toString();
+					// System.out.println(d);
+					if (t.getNumberOfCarsSpotted().containsKey(d)) {
+						t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d) + 1);
+					} else {
+						t.getNumberOfCarsSpotted().put(d, 1);
+					}
 				}
-
 			}
 
 		}
 
-		System.out.println(t.getNumberOfCarsSpotted().keySet());
-
 		return t;
-
 	}
 
 	public float getXcoordinate(String s) {
@@ -376,6 +421,41 @@ public class EventController {
 		}
 		y_coordinate = y_coordinate / (tokens.length / 2);
 		return y_coordinate;
+	}
+
+	public locationsummary getLocationSummary(List<trafficsummary> tsummary, List<parkingsummary> psummary) {
+		locationsummary l = new locationsummary();
+
+		if (tsummary.size() > 0) {
+			l.setMost_traffic_prone_location(tsummary.get(0).getLocationcoordinates());
+			int k = 0;
+			for (int i = 0; i <= tsummary.size() - 1; i++) {
+				if (tsummary.get(i) != null) {
+					if (tsummary.get(i).getNoOfVehivles() > tsummary.get(k).getNoOfVehivles()) {
+						l.setMost_traffic_prone_location(tsummary.get(i).getLocationcoordinates());
+						k = i;
+					}
+					l.setTotal_vehicles(l.getTotal_vehicles() + tsummary.get(i).getNoOfVehivles());
+				}
+			}
+
+			l.setMost_number_of_cars_parked(psummary.get(0).getLocationcoordinates());
+			k = 0;
+			for (int i = 0; i <= psummary.size() - 1; i++) {
+				if (psummary.get(i).getTotalNumberOfCars() != null) {
+					l.setTotal_cars_parked(l.getTotal_cars_parked() + psummary.get(i).getTotalNumberOfCars());
+
+					if (psummary.get(i).getTotalNumberOfCars() > psummary.get(k).getTotalNumberOfCars()) {
+						l.setMost_number_of_cars_parked(psummary.get(i).getLocationcoordinates());
+						k = i;
+					}
+				}
+
+			}
+
+		}
+
+		return l;
 	}
 
 }

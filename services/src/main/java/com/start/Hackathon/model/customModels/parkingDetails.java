@@ -8,14 +8,18 @@ public class parkingDetails {
 	String parkingouttimestamp;
 	String objectUid;
 	String totaltime;
+	String coordinates;
 	
-	public parkingDetails(String locationUid, String assetUid, String parkingintimestamp, String objectUid) {
+	public parkingDetails(String locationUid, String assetUid, String parkingintimestamp, String objectUid,
+			String coordinates) {
 		super();
 		this.locationUid = locationUid;
 		this.assetUid = assetUid;
 		this.parkingintimestamp = parkingintimestamp;
 		this.objectUid = objectUid;
+		this.coordinates = coordinates;
 	}
+	
 	public String getLocationUid() {
 		return locationUid;
 	}
@@ -52,6 +56,16 @@ public class parkingDetails {
 	public void setTotaltime(String totaltime) {
 		this.totaltime = totaltime;
 	}
+
+	public String getCoordinates() {
+		return coordinates;
+	}
+
+	public void setCoordinates(String coordinates) {
+		this.coordinates = coordinates;
+	}
+	
+	
 	
 	
 

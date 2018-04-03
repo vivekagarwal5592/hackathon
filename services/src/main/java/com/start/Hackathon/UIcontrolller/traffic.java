@@ -30,5 +30,11 @@ public class traffic {
 	//	System.out.println("In pa");
 		return "currentlocation.html";
 	}
+	
+	@GetMapping("/locationanalysis")
+	public String getlocationanakysis() {
+	//	System.out.println("In pa");
+		return "LocationAnalysis.html";
+	}
 
 }

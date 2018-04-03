@@ -1,55 +1,50 @@
 $( function() {
   $( "#fromdate" ).datepicker();
   $( "#todate" ).datepicker();
-
-
-// getlocationcoordinates(getlocationUids);
-  
-  
-  
+ 
 });
 
 
 
 let  getlocationcoordinates = (callback)=> {
 
-  // let startts = $('#fromdate').val();
-  // let endts = $('#todate').val();
-  //
-  // console.log(startts)
-  // console.log(endts)
 
  let geocoder = new google.maps.Geocoder;
-    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' /* $('#current_position').val() */}, function(results, status) {
+    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego'}, function(results, status) {
   if (status == google.maps.GeocoderStatus.OK) {
    let  latitude = results[0].geometry.location.lat();
      longitude = results[0].geometry.location.lng();
-
-     // callback function is get locationUids
+  // markarea(latitude,longitude)
    callback(latitude,longitude)
  }
 });
 };
   let  getlocationUids = (latitude,longitude)=> {
+	  $(".locations").empty()
       $.ajax({
       type: "POST",
       dataType: "json",
       url : "getAllTrafficLocationswithinbbox",
       data : {
-        "bbox":parseFloat(latitude+0.1) + ':' + parseFloat(longitude+0.1) + ','+ parseFloat(latitude-0.1) + ':' + parseFloat(longitude-0.1)
+        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02)
 
       },
       success : function(data) {
-      // console.log(data)
-        i=0
-        // $(".locations").empty()
+  // i=0
+        
         data.content.forEach(item=>{
-           $(".locations").append(`<a onclick='trafficdetails("${item.locationUid}")'>Traffic Lane ${i} </a><br />`);
-        // $(".locations").append(`<a
-		// onclick='locationdetails("${item.locationUid}")'>Location ${i} ${i}
+        	
+        	 let pDetails = []
+ 	        data.content.forEach(item=>{
+ 	        	pDetails.push(locationdetails(item))
+ 	         })  
+ 	        
+ 	         changeMapLocationLoop(pDetails,latitude,longitude)
+        	
+       // $(".locations").append(`<a
+		// onclick='trafficdetails("${item.locationUid}")'>Traffic Lane ${i}
 		// </a><br />`);
-           i +=1;
-          // console.log(item.locationUid)
+         // i +=1;
         })
       },
        error: function(jqXHR, textStatus, errorThrown){
@@ -63,6 +58,11 @@ let  trafficdetails = (locationUid)=> {
    let startts = $('#fromdate').val() + " "+ $('#fromtime').val() ;
     let endts = $('#todate').val() + " " +  $('#totime').val() ;
 
+    if($('#fromdate').val()  == '' || $('#todate').val() ==''){
+    	alert("Please enter the date and the time")
+    }
+    else{
+    	
   $.ajax({
   type: "POST",
   dataType: "json",
@@ -74,110 +74,80 @@ endts:endts
   },
   success : function(data) {
 
-console.log(data)
-  // var element = $(".parkingdetails");//convert string to JQuery element
-  // element.find("span").remove();//remove span elements
-  // var newString = element.html();//get back new string
-
-renderChart(data.numberOfCarsSpotted)
-$(".parkingdetails").append(`<span id="e1" class='element1'>Number of vehicles:${data.noOfVehivles} </span><br />`);
+if(data !=null){
+	renderChart(data.numberOfCarsSpotted)
+	document.getElementById("e1").innerHTML = data.noOfVehivles;
+	
+}
 
   },
    error: function(jqXHR, textStatus, errorThrown){
-alert(textStatus);
+alert("No data for your search");
 }
 });
 
-locationdetails(locationUid)
+// locationdetails(locationUid)
 
+}
+}
+
+let  locationdetails = (ldetails)=> {
+
+let list = getcoordinates(ldetails.coordinates)
+let xy = getcentroid(list)
+
+ return {'list':list,'latitude':xy.x,'longitude':xy.y,'locationUid':ldetails.locationUid}
 
 }
 
-let  locationdetails = (locationUid)=> {
-$.ajax({
-type: "POST",
-dataType: "json",
-url : "getSingleLocationDetails",
-data : {
-locationuid: locationUid
-},
-success : function(data) {
+let getcentroid = (list)=>{
+	let x = 0
+	let y =0
+	list.forEach(item=>{
+		x += item.lat
+		y += item.lng
+	})
+	
+	x = x/list.length
+	y = y/list.length
+	
+	return {x,y}
 
-
-list = getcoordinates(data.coordinates)
-
-
-
-changeMapLocation(data.x_coordinate,data.y_coordinate,list)
-getaddressForGeoCode(data.x_coordinate,data.y_coordinate,function(result){
-  $(".parkingdetails").append(`<span id="e2" class='element3'>Address:${result} </span><br />`);
-
-})
-},
- error: function(jqXHR, textStatus, errorThrown){
-alert(textStatus);
-}
-});
 }
 
-let centroid = (coordinates) =>{}
+
 
 let getcoordinates = (coordinates) =>{
-
  let xy = coordinates.split(",")
-
 let list = []
  xy.forEach(items=>{
    val = items.split(":")
    list.push({lat:parseFloat(val[0]),lng:parseFloat(val[1])})
  })
-
-// console.log(list)
 return list;
 }
 
-$("select" )
-.change(function () {
-var str = "";
-$( "select option:selected" ).each(function() {
-  str += $( this ).text() + " ";
-  console.log(str)
-});
-
-})
-.change();
+/*
+ * $("select" ) .change(function () { var str = ""; $( "select option:selected"
+ * ).each(function() { str += $( this ).text() + " "; console.log(str) }); })
+ * .change();
+ */
 
 
 function changeMapLocation(latitude,longitude,list) {
-console.log("I am in change Map location")
-console.log(latitude)
-console.log(longitude)
+
      var uluru = {lat: latitude, lng: longitude};
-     var map = new google.maps.Map(document.getElementById('map'), {
+     var map = new google.maps.Map(document.getElementById('map2'), {
        zoom: 23,
        center: uluru,
        mapTypeId: 'satellite'
      });
-
-     // var line = new google.maps.Polyline({
-     // path: [new google.maps.LatLng(latitude+1,longitude+1), new
-		// google.maps.LatLng(latitude-10,longitude-10)],
-     // strokeColor: "#FF0000",
-     // strokeOpacity: 1.0,
-     // strokeWeight: 10,
-     // // geodesic: true,
-     // // map: map
-     // });
-     //
-     // line.setMap(map);
 
      var marker = new google.maps.Marker({
        position: uluru,
      });
 
 // marker.setMap(map)
-
-
        var flightPath = new google.maps.Polyline({
          path: list,
          geodesic: true,
@@ -202,23 +172,20 @@ function initMap() {
    }
 
    let getaddressForGeoCode = (latitude,longitude,callback) => {
+	   console.log("I am trying to egt address")
      let geocoder = new google.maps.Geocoder;
      var latlng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
          geocoder.geocode( {'location': latlng}, function(results, status) {
 
-       if (status == google.maps.GeocoderStatus.OK) {
-        // console.log()
-  callback(results[0].formatted_address)
+       if (status == google.maps.GeocoderStatus.OK) { 
+          callback(results[0].formatted_address)
       }
      });
    }
 
-
-
-
    function renderChart(data) {
 
-console.log(data)
+// console.log(data)
 let list = []
 for(key in data){
   list.push({label:key,y:data[key]})
@@ -232,7 +199,7 @@ var chart = new CanvasJS.Chart("chartContainer", {
 	animationEnabled: true,
 	theme: "light2",
 	title:{
-		text: "Simple Line Chart"
+		text: "Traffic Statistics"
 	},
 	axisY:{
 		includeZero: false
@@ -244,17 +211,54 @@ var chart = new CanvasJS.Chart("chartContainer", {
 });
 chart.render();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
+   
+   
+   function changeMapLocationLoop(locationdetails,centerx,centery,list) {
+
+		 var uluru = {lat:centerx, lng: centery};
+		    var map = new google.maps.Map(document.getElementById('map'), {
+		      zoom: 13,
+		      center: uluru,
+		// mapTypeId: 'satellite'
+		    });
+		
+		
+		  var cityCircle = new google.maps.Circle({
+	          strokeColor: '#FF0000',
+	          strokeOpacity: 0.8,
+	          strokeWeight: 2,
+	          fillColor: '#FF0000',
+	          fillOpacity: 0.35,
+	          map: map,
+	          center: uluru,
+	          radius:   3000
+	        });
+
+	      cityCircle.setMap(map);
+	      
+	    
+	      locationdetails.forEach(items=>{
+	    	  var marker = new google.maps.Marker({
+	              position:  {lat:items.latitude, lng: items.longitude},
+	              map: map,
+	              locationUid:items.locationUid,
+	              lanecoordinates:items.list,
+	              x:items.latitude,
+	              y: items.longitude
+	            });
+	    	  
+	    	  marker.addListener('click', function() {
+	    		  trafficdetails(marker.locationUid)
+	    	      	getaddressForGeoCode(marker.x,marker.y,function(result){
+	    	      	document.getElementById("e3").innerHTML = result;
+	    	      	changeMapLocation(marker.x,marker.y,items.list) 
+	    	      		})
+	    	         });
+	          
+	          marker.setMap(map) 
+	      })
+	     
+	     
+	  }
+  

@@ -19,4 +19,16 @@ a:hover{
 	font-family:helvetica
 	color:f8f8f8;
 	margin-top:10px;
+	font-size:20px;
+}
+
+.analytical-result{
+	font-weight:bold;
+	font-family:helvetica;
+	font-size:15px;
+}
+
+.home-image{
+	height:350px;
+	width:100%;
 }

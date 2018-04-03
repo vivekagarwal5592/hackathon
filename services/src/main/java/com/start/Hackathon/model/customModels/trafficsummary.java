@@ -15,6 +15,7 @@ public class trafficsummary {
 		super();
 		this.noOfVehivles = 0;
 	}
+
 	public Integer getNoOfVehivles() {
 		return noOfVehivles;
 	}
