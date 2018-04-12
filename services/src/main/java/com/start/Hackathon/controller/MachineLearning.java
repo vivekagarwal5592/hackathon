@@ -204,7 +204,7 @@ public class MachineLearning {
 
 		FileWriter fileWriter = null;
 		try {
-			fileWriter = new FileWriter("src/main/files/parkingdetail.csv");
+			fileWriter = new FileWriter("src/main/files/parkingdetail.csv",true);
 			for (parkingDetails p : objectuids) {
 				if (p.getTotaltime() != null) {
 					fileWriter.append(String.valueOf(p.getAssetUid()));
@@ -249,7 +249,7 @@ public class MachineLearning {
 		FileWriter fileWriter = null;
 		try {
 
-			fileWriter = new FileWriter("src/main/files/parkingsummary.csv");
+			fileWriter = new FileWriter("src/main/files/parkingsummary.csv",true);
 			for (parkingsummary p : objectuids) {
 
 				p.getNumberOfCarsParked();
@@ -296,7 +296,7 @@ public class MachineLearning {
 
 		FileWriter fileWriter = null;
 		try {
-			fileWriter = new FileWriter("src/main/files/trafficsummary.csv");
+			fileWriter = new FileWriter("src/main/files/trafficsummary.csv",true);
 			for (trafficsummary p : objectuids) {
 
 				for (Map.Entry<String, Integer> e : p.getNumberOfCarsSpotted().entrySet()) {
