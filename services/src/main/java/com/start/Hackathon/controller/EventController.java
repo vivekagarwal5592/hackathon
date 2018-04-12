@@ -1,6 +1,8 @@
 package com.start.Hackathon.controller;
 
 import java.awt.Point;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -131,6 +133,7 @@ public class EventController {
 	public ResponseEntity<locationsummary> getlocationsummary(@RequestParam String startts, @RequestParam String endts,
 			@RequestParam String bbox) {
 
+		System.out.println("I am in etlocationsummary");
 		String url = "https://ic-metadata-service-sdhack.run.aws-usw02-pr.ice.predix.io/v2/metadata/";
 		locationDetail parkingDetail = restTemplate
 				.exchange(url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50",
@@ -153,10 +156,20 @@ public class EventController {
 
 		List<parkingsummary> psummary = new ArrayList<parkingsummary>();
 		for (location l : parkingDetail.getContent()) {
-			psummary.add(getPKINForLastTendays(l.getLocationUid(), startts, endts).getBody());
+			parkingsummary p = getPKINForLastTendays(l.getLocationUid(), startts, endts).getBody();
+			if (p.getLocationUid() != null) {
+				psummary.add(p);
+			}
+
 		}
 
-		locationsummary lsummary = getLocationSummary(tsummary, psummary);
+		locationsummary lsummary = new locationsummary();
+		lsummary.setParkingsummary(psummary);
+		lsummary.setTrafficsummary(tsummary);
+
+		System.out.println("I am going to download csv");
+		// downloadcsv(psummary);
+		// getLocationSummary(tsummary, psummary);
 
 		return new ResponseEntity<locationsummary>(lsummary, getResponseHeaders(), HttpStatus.CREATED);
 
@@ -167,13 +180,21 @@ public class EventController {
 	@RequestMapping(value = "/getTrafficForLastTendays", method = RequestMethod.POST)
 	public ResponseEntity<trafficsummary> getTrafficForLastTenDays(@RequestParam String traffic_loc,
 			@RequestParam String startts, @RequestParam String endts) {
+		trafficsummary t = new trafficsummary();
 
-		trafficevent traffic = restTemplate.exchange(
-				url + "locations/" + traffic_loc + "/events?eventType=TFEVT&" + "startTime="
-						+ getdateinTimeStamp(startts) + "&endTime=" + getdateinTimeStamp(endts),
-				HttpMethod.GET, getTrafficHeaders(), trafficevent.class).getBody();
+		String starttime = getdateinTimeStamp(startts);
+		String endtime = getdateinTimeStamp(endts);
 
-		trafficsummary t = getTrafficSummary(traffic);
+		while ((Long.parseLong(starttime) + 21600000) <= Long.parseLong(endtime)) {
+
+			trafficevent traffic = restTemplate.exchange(
+					url + "locations/" + traffic_loc + "/events?eventType=TFEVT&" + "startTime=" + starttime
+							+ "&endTime=" + String.valueOf(Long.parseLong(starttime) + 21600000),
+					HttpMethod.GET, getTrafficHeaders(), trafficevent.class).getBody();
+			getTrafficSummary(t, traffic);
+			starttime = String.valueOf(Long.parseLong(starttime) + 21600000);
+		}
+
 		return new ResponseEntity<trafficsummary>(t, getResponseHeaders(), HttpStatus.CREATED);
 
 	}
@@ -339,10 +360,12 @@ public class EventController {
 
 	public parkingsummary getparkingSummary(List<parkingDetails> objectuids) {
 
+		// downloadcsv(objectuids);
 		parkingsummary parkingsummary = new parkingsummary();
 		parkingsummary.setTotalNumberOfCars(objectuids.size());
 		if (objectuids.size() > 0) {
 			parkingsummary.setLocationcoordinates(objectuids.get(0).getCoordinates());
+			parkingsummary.setLocationUid(objectuids.get(0).getLocationUid());
 		}
 
 		for (parkingDetails p : objectuids) {
@@ -370,9 +393,8 @@ public class EventController {
 		return parkingsummary;
 	}
 
-	public trafficsummary getTrafficSummary(trafficevent traffic) {
+	public trafficsummary getTrafficSummary(trafficsummary t, trafficevent traffic) {
 
-		trafficsummary t = new trafficsummary();
 		if (traffic.getContent().length > 0) {
 
 			t.setLocationUid(traffic.getContent()[0].getLocationUid());
@@ -385,9 +407,10 @@ public class EventController {
 					String d = new SimpleDateFormat("dd-hh a").format(currentDate).toString();
 					// System.out.println(d);
 					if (t.getNumberOfCarsSpotted().containsKey(d)) {
-						t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d) + 1);
+						t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d)
+								+ traffic.getContent()[i].getMeasures().getVehicleCount());
 					} else {
-						t.getNumberOfCarsSpotted().put(d, 1);
+						t.getNumberOfCarsSpotted().put(d, traffic.getContent()[i].getMeasures().getVehicleCount());
 					}
 				}
 			}
@@ -426,34 +449,22 @@ public class EventController {
 	public locationsummary getLocationSummary(List<trafficsummary> tsummary, List<parkingsummary> psummary) {
 		locationsummary l = new locationsummary();
 
-		if (tsummary.size() > 0) {
-			l.setMost_traffic_prone_location(tsummary.get(0).getLocationcoordinates());
-			int k = 0;
-			for (int i = 0; i <= tsummary.size() - 1; i++) {
-				if (tsummary.get(i) != null) {
-					if (tsummary.get(i).getNoOfVehivles() > tsummary.get(k).getNoOfVehivles()) {
-						l.setMost_traffic_prone_location(tsummary.get(i).getLocationcoordinates());
-						k = i;
-					}
-					l.setTotal_vehicles(l.getTotal_vehicles() + tsummary.get(i).getNoOfVehivles());
-				}
-			}
+		/*
+		 * for (int i = 0; i <= tsummary.size() - 1; i++) { if
+		 * (tsummary.get(i).getLocationUid() != null) {
+		 * l.getTraffic_chart().put(tsummary.get(i).getLocationUid(),
+		 * tsummary.get(i).getNoOfVehivles()); } }
+		 * 
+		 * for (int i = 0; i <= psummary.size() - 1; i++) { if
+		 * (psummary.get(i).getLocationUid() != null) {
+		 * l.getParking_chart().put(psummary.get(i).getLocationUid(),
+		 * psummary.get(i).getTotalNumberOfCars());
+		 * 
+		 * } }
+		 */
 
-			l.setMost_number_of_cars_parked(psummary.get(0).getLocationcoordinates());
-			k = 0;
-			for (int i = 0; i <= psummary.size() - 1; i++) {
-				if (psummary.get(i).getTotalNumberOfCars() != null) {
-					l.setTotal_cars_parked(l.getTotal_cars_parked() + psummary.get(i).getTotalNumberOfCars());
-
-					if (psummary.get(i).getTotalNumberOfCars() > psummary.get(k).getTotalNumberOfCars()) {
-						l.setMost_number_of_cars_parked(psummary.get(i).getLocationcoordinates());
-						k = i;
-					}
-				}
-
-			}
-
-		}
+		l.setTrafficsummary(tsummary);
+		l.setParkingsummary(psummary);
 
 		return l;
 	}

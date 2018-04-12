@@ -4,7 +4,7 @@ public class datatrain {
 	
 	String violation;
 	String locationUid;
-	String parking;
+	String totalcarsparked;
 	
 	
 

@@ -2,7 +2,7 @@
 applications:
   - name: parkingspace
     buildpack: java_buildpack
-    path: target/Hackathon-Services-0.0.1-SNAPSHOT.war
+    path: target/Hackathon-Services-1.0.0.jar
     memory: 512M
     timeout : 180
 

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<style>
+#map {
+	height: 400px;
+	width: 100%;
+}
+</style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Parking prediction</title>
+<link rel="stylesheet"
+	href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="css/custom.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+<!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"> -->
+
+<link rel="stylesheet"
+	href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+<script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css" />
+
+</head>
+
+<body>
+	<div class="container">
+
+		<div class="row">
+
+			<nav class="navbar navbar-default">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<a class="navbar-brand" href="/">San Diego Smart Analysis</a>
+					</div>
+					<ul class="nav navbar-nav">
+						<li><a href="/">Home</a></li>
+						<li><a href="getparkinganalysis">Parking Analysis</a></li>
+						<li><a href="gettrafficanalysis">Traffic Analysis</a></li>
+						<li><a href="locationanalysis">Location Analysis</a></li>
+						<li class="active"><a href="getfutureparkingspace">Future
+								Parking</a></li>
+
+					</ul>
+				</div>
+			</nav>
+
+		</div>
+
+
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="">Location</label> <select class="city form-control">
+						<option value="Balboa Park">Balboa Park</option>
+						<option value="Bankers Hill">Bankers Hill</option>
+						<option value="Sherman Heights">Sherman Heights</option>
+						<option value="Air and space museum">Air and space museum</option>
+						<option value="San diego Civic theater">San diego Civic
+							theater</option>
+					</select> <label for="fromdate">From</label> <input type="text"
+						class="form-control" id="fromdate" name="fromdate" /> <label
+						for="todate">To</label> <input type="text" class="form-control"
+						id="todate" name="todate" /> <label for="predictiondate">Prediction
+						Date</label> <input type="text" class="form-control" id="predictiondate"
+						name="predictiondate" /> <label for="fromtime">Prediction
+						Time</label> <select id="fromtime" class=" form-control">
+						<option value="12:00 AM">12:00 AM</option>
+						<option value="1:00 AM">1:00 AM</option>
+						<option value="2:00 AM">2:00 AM</option>
+						<option value="2:15 AM">3:00 AM</option>
+						<option value="2:30 AM">4:00 AM</option>
+						<option value="2:45 AM">5:00 AM</option>
+						<option value="12:00 AM">6:00 AM</option>
+						<option value="1:00 AM">7:00 AM</option>
+						<option value="2:00 AM">8:00 AM</option>
+						<option value="2:15 AM">9:00 AM</option>
+						<option value="2:30 AM">10:00 AM</option>
+						<option value="2:45 AM">11:00 AM</option>
+						<option value="2:45 AM">12:00 PM</option>
+						<option value="2:45 AM">1:00 PM</option>
+						<option value="2:45 AM">2:00 PM</option>
+						<option value="2:45 AM">3:00 PM</option>
+						<option value="2:45 AM">4:00 PM</option>
+						<option value="2:45 AM">5:00 PM</option>
+						<option value="2:45 AM">6:00 PM</option>
+						<option value="2:45 AM">7:00 PM</option>
+						<option value="2:45 AM">8:00 PM</option>
+						<option value="2:45 AM">9:00 PM</option>
+						<option value="2:45 AM">10:00 PM</option>
+						<option value="2:45 AM">11:00 PM</option>
+
+					</select>
+
+
+					<button type="button" class="btn btn-info"
+						onclick="getlocationcoordinates(getLocationSummary)"
+						style="margin-top: 7px;">Get Parking summary</button>
+
+
+					<button type="button" class="btn btn-info"
+						onclick="getlocationcoordinates(getLocationSummary2)"
+						style="margin-top: 7px;">Get Traffic Summary</button>
+
+					<label for="fromtime">Hourly for traffic</label> <input
+						type="checkbox" value="true" name="hourly" id="hourly" />
+						
+						 <label
+						for="fromtime">Hourly for parking</label> <input type="checkbox"
+						value="true" name="hourlyparking" id="hourlyparking" />
+
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+
+			<div class="col-md-4">
+				<div id="map"
+					style="height: 370px; max-width: 920px; margin: 0px auto;"></div>
+			</div>
+
+			<div class="col-md-4">
+				<div id="chartContainer2" class="dialog"
+					style="height: 370px; max-width: 920px; margin: 0px auto;"></div>
+			</div>
+		</div>
+	</div>
+
+
+	<script async="async" defer="defer"
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD337K3FBoUIcvjTAovo91T3gnIHc6wSwc&amp;callback=initMap"></script>
+	<script src="js/machinelearning.js"></script>
+</body>
+</html>

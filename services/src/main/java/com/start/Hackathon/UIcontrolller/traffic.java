@@ -1,40 +1,44 @@
 package com.start.Hackathon.UIcontrolller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class traffic {
 
-	
-	@GetMapping("/")
+	@RequestMapping("/")
 	public String index() {
-		return "index.html";
+		return "index";
 	}
 
-	@GetMapping("/getparkinganalysis")
+	@RequestMapping("/getparkinganalysis")
 	public String getparkinganalysis() {
-		//System.out.println("In pa");
-		return "getparkinganalysis.html";
+		// System.out.println("In pa");
+		return "getparkinganalysis";
 	}
 
-	@GetMapping("/gettrafficanalysis")
+	@RequestMapping("/gettrafficanalysis")
 	public String gettrafficanalysis() {
-	//	System.out.println("In pa");
-		return "gettrafficanalysis.html";
+		// System.out.println("In pa");
+		return "gettrafficanalysis";
 	}
 
-	@GetMapping("/currentlocation")
+	@RequestMapping("/currentlocation")
 	public String currentlocation() {
-	//	System.out.println("In pa");
-		return "currentlocation.html";
+		// System.out.println("In pa");
+		return "currentlocation";
+	}
+
+	@RequestMapping("/locationanalysis")
+	public String getlocationanakysis() {
+		// System.out.println("In pa");
+		return "locationanalysis";
 	}
 	
-	@GetMapping("/locationanalysis")
-	public String getlocationanakysis() {
-	//	System.out.println("In pa");
-		return "LocationAnalysis.html";
+	@RequestMapping("/getfutureparkingspace")
+	public String getfutureparkingspace() {
+		 System.out.println("In pa");
+		return "machinelearning";
 	}
 
 }

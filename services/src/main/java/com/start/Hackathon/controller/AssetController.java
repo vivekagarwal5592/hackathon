@@ -17,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -48,6 +50,8 @@ public class AssetController {
 		this.authorization = authorization;
 		restTemplate = new RestTemplate();
 	}
+	
+	//org.springframework.context.ApplicationContextInitializer
 
 	// dummy method
 	@RequestMapping(value = "/getallAssets", method = RequestMethod.GET)
@@ -81,7 +85,8 @@ public class AssetController {
 					.getBody();
 
 			return new ResponseEntity<locationDetail>(locationDetail, getResponseHeaders(), HttpStatus.CREATED);
-		} catch (Exception e) {
+		} catch (HttpServerErrorException e) {
+			System.out.println(e.getResponseBodyAsString());
 			return null;
 		}
 

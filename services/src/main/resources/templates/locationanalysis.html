@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <style>
 #map {
@@ -8,28 +8,26 @@
 	width: 100%;
 }
 </style>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Location Analysis</title>
 <link rel="stylesheet"
-	href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="/resources/demos/style.css">
-<link rel="stylesheet" href="css/custom.css">
+	href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="css/custom.css" />
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-<script async defer
-	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD337K3FBoUIcvjTAovo91T3gnIHc6wSwc&callback=initMap"></script>
+
 <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"> -->
-<script src="js/locationanalysis.js"></script>
 
-<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-<link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+<script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css" />
 
-<script>
-	
-</script>
 </head>
 <body>
 	<div id="locationSummary" class="container">
@@ -43,11 +41,11 @@
 					</div>
 					<ul class="nav navbar-nav">
 						<li><a href="/">Home</a></li>
-						<li ><a href="getparkinganalysis">Parking
-								Analysis</a></li>
+						<li><a href="getparkinganalysis">Parking Analysis</a></li>
 						<li><a href="gettrafficanalysis">Traffic Analysis</a></li>
-						<li class="active"><a href="locationanalysis" >Location Analysis</a></li>
-						<li><a href="currentlocation">Get Nearest Parking</a></li>
+						<li class="active"><a href="locationanalysis">Location
+								Analysis</a></li>
+						<li><a href="getfutureparkingspace">Future Parking</a></li>
 					</ul>
 				</div>
 			</nav>
@@ -55,21 +53,7 @@
 		</div>
 		<div class="row">
 			<div class="col-md-4 parkingdetails">
-				<div id="map"></div>
-			</div>
 
-			<div class="col-md-4 ">
-				<span class="heading-label">Total Vehicles:</span><span id="total-vehicles"></span>
-				<br> <span class="heading-label">Total Cars Parked:</span><span id="total-parked"></span><br>
-				<span class="heading-label">Most Traffic Prone Location</span><span
-					id="most-traffic"></span> <br> <span class="heading-label">Most
-					number of Cars Parked</span><span id="most-parking"></span>
-			</div>
-
-
-
-
-			<div class="col-md-4 ">
 				<div class="form-group">
 					<label for="">Location</label> <select class="city form-control"
 						onChange="">
@@ -87,24 +71,60 @@
 						class="form-control" id="fromdate" name="fromdate" /> <label
 						for="todate">To</label> <input type="text" class="form-control"
 						id="todate" name="todate" />
-						
-						<button type="button" class="btn btn-info"
+
+					<button type="button" class="btn btn-info"
 						onclick="getlocationcoordinates(getLocationSummary)"
 						style="margin-top: 7px;">Submit</button>
 
 				</div>
 
-				<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+
+			</div>
+			<div class="col-md-6 col-md-offset-2 parkingdetails">
+				<div id="map"></div>
+				<span id="e3"></span>
+			</div>
+		</div>
+		<div style="margin: 10px;"></div>
+		<div class="row">
+			<div class="col-md-6 ">
+
+
+				<div id="chartContainer2" class="dialog"
+					style="height: 370px; max-width: 920px; margin: 0px auto;"></div>
+
+			</div>
+
+
+
+
+			<div class="col-md-6 ">
+
+
+				<div id="chartContainer" class="dialog"
+					style="height: 370px; max-width: 920px; margin: 0px auto;"></div>
 
 
 			</div>
 
 
 
-		
+
+		</div>
+		<div class="row">
+
+			<div class="col-md-6">
+				<div id="parkingheatmap" style="width: 100%; height: 400px;"></div>
+			</div>
+			<div class="col-md-6">
+				<div id="trafficheatmap" style="width: 100%; height: 400px;"></div>
+			</div>
 		</div>
 	</div>
 
-
+	<script async="async" defer="defer"
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD337K3FBoUIcvjTAovo91T3gnIHc6wSwc&amp;callback=initMap&amp;libraries=visualization"></script>
+	<script src="js/locationanalysis.js"></script>
 </body>
 </html>

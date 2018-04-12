@@ -1,6 +1,9 @@
 $( function() {
   $( "#fromdate" ).datepicker();
   $( "#todate" ).datepicker();
+  $( "#predictiondate").datepicker({
+	  altFormat: "mm-dd-yy"
+  });
 
  // $('#datetimepicker1').datetimepicker();
 // getlocationcoordinates(getlocationUids);
@@ -23,6 +26,13 @@ let  getlocationcoordinates = (callback)=> {
 
 let getLocationSummary = (latitude,longitude) =>{
   
+	
+	let hourlyparking = false;
+	if($('#hourlyparking').is(':checked') ){
+		hourlyparking = true
+	}
+	
+	
 	if($('#fromdate').val() == '' || $('#todate').val() ==''){
 		alert("Please select date")
 	}
@@ -30,21 +40,79 @@ let getLocationSummary = (latitude,longitude) =>{
 	   $.ajax({
 		      type: "POST",
 		      dataType: "json",
-		      url : "getlocationsummary",
+		      url : "getparkingsummarycsv",
 		      data : {
 		        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
 		        "startts":$('#fromdate').val(),
-		        "endts": $('#todate').val()
+		        "endts": $('#todate').val(),
+		        "hourly": hourlyparking
 		      
 		      },
 		      success : function(data) {
 		
-		    	  gettrafficheatmap(latitude,longitude,data.trafficsummary);
-		    	  getparkingheatmap(latitude,longitude,data.parkingsummary);
+		    	  console.log(data)
+		    	 // gettrafficheatmap(latitude,longitude,data.trafficsummary);
+		    	 // getparkingheatmap(latitude,longitude,data.parkingsummary);
 		    	
 		    	  
-		    	  renderbarChart(data.trafficsummary);
-		    	  renderparkingChart(data.parkingsummary);
+		    	 // renderbarChart(data.trafficsummary);
+		    	  renderparkingChart(data);
+		    	  
+		    	/*
+				 * renderbarChart(data.traffic_chart)
+				 * renderparkingChart(data.parking_chart)
+				 */
+		      },
+		       error: function(jqXHR, textStatus, errorThrown){
+		    alert(textStatus);
+		    console.log(jqXHR.responseText)
+		    }
+		    });
+}
+	
+}
+
+
+
+
+let getLocationSummary2 = (latitude,longitude) =>{
+	  
+	
+	console.log($('#hourly').is(':checked') )
+	
+	let hourly = false;
+	if($('#hourly').is(':checked') ){
+		hourly = true
+	}
+	
+	
+	if($('#fromdate').val() == '' || $('#todate').val() ==''){
+		alert("Please select date")
+	}
+	
+	
+	
+	else{
+	   $.ajax({
+		      type: "POST",
+		      dataType: "json",
+		      url : "gettrafficsummarycsv",
+		      data : {
+		        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
+		        "startts":$('#fromdate').val(),
+		        "endts": $('#todate').val(),
+		        "hourly":hourly
+		      
+		      },
+		      success : function(data) {
+		
+		    	  console.log(data)
+		    	 // gettrafficheatmap(latitude,longitude,data.trafficsummary);
+		    	 // getparkingheatmap(latitude,longitude,data.parkingsummary);
+		    	
+		    	  
+		    	 // renderbarChart(data.trafficsummary);
+		    	 // renderparkingChart(data);
 		    	  
 		    	/*
 				 * renderbarChart(data.traffic_chart)
@@ -161,7 +229,7 @@ function initMap() {
 
 function renderbarChart(d) {
 
-	// console.log("I am getting traffic analysis")
+	console.log("I am getting traffic analysis")
 	   console.log(d)
 	   let datapoints = []
 	   let i=1
@@ -183,8 +251,14 @@ function renderbarChart(d) {
 	   
 	   
 	     let data = []
-	   let enddata = {type : "column",yValueFormatString : "#,##0.0#",dataPoints:datapoints,  click: function(e){   
-		   getLocationDetails(e.dataPoint.locationUid)
+	   let enddata = {type : "column",yValueFormatString : "#,##0.0#",dataPoints:datapoints,  click: function(e){  
+		   
+		   if($('#predictiondate').val() == ''){
+				alert("Please select date")
+			}
+		   datetime = $('#predictiondate').val()+ " "+ $('#fromtime').val() ;
+		   
+		   getLocationDetails(datetime,e.dataPoint.locationUid)
 		   
 		  // alert( "clicked" + );
 	   }
@@ -213,7 +287,7 @@ $("#chartContainer").CanvasJSChart(options);
 }
    
    
-   function renderparkingChart(d) {
+   let renderparkingChart = (d)=> {
 
 	 // console.log(d)
 	   let datapoints = []
@@ -244,8 +318,17 @@ $("#chartContainer").CanvasJSChart(options);
 
 
 	   let data = []
-	   let enddata = {type : "column",yValueFormatString : "#,##0.0#",dataPoints:datapoints,  click: function(e){   
-		   getLocationDetails(e.dataPoint.locationUid)
+	   let enddata = {type : "column",yValueFormatString : "#,##0.0#",dataPoints:datapoints,  click: function(e){ 
+		   
+		   if($('#predictiondate').val() == '' ||  $('#fromtime').val()=='' ){
+				alert("Please select date")
+			}
+		   else{
+			   datetime = $('#predictiondate').val()+ " "+ $('#fromtime').val() ;
+			   console.log(datetime)
+			   getLocationDetails(datetime,e.dataPoint.locationUid)  
+		   }
+		
 		   
 		  // alert( "clicked" + );
 	   }
@@ -290,30 +373,33 @@ $("#chartContainer").CanvasJSChart(options);
 
 	}
    
-   let  getLocationDetails = (locationUid) =>
+   let  getLocationDetails = (datetime,locationUid) =>
    {
+	  
+	   getfutureprediction(datetime,locationUid)
+   }
+   
+   let  getfutureprediction =(datetime,locationUid)=>{
+	   
+	   console.log(datetime)
 	   $.ajax({
+		  
 		   type: "POST",
 		   dataType: "json",
-		   url : "getSingleLocationDetails",
+		   url : "http://localhost:5001/api/1.0/parkingprediction",
 		   data : {
-			   locationuid:locationUid
+			   datetime: datetime,
+			  locationUid:locationUid
 		   },
 		   success : function(data) {
-
-			   coordinates = getcoordinates(data.coordinates);
-			   marker = getcentroid(coordinates)
-			   changeMapLocation(marker.x,marker.y,coordinates) 
-			   
-				getaddressForGeoCode(marker.x,marker.y,function(result){
-	    	      	document.getElementById("e3").innerHTML = result;
-	    	      	
-	    	      		})
+			 console.log(data)
 		   },
 		 error: function(jqXHR, textStatus, errorThrown){
 		 alert(textStatus);
 		 }
 		 });
+	   
+	   
 	   
    }
    
@@ -326,8 +412,7 @@ $("#chartContainer").CanvasJSChart(options);
 		   let marker = getcentroid(coordinates)
 		  
 		   let total_carsSpotted = 0;
-		   for(key in  items.numberOfCarsSpotted){
-			   
+		   for(key in  items.numberOfCarsSpotted){ 
 			   total_carsSpotted +=  items.numberOfCarsSpotted[key]
 			}
 		   
@@ -352,8 +437,8 @@ $("#chartContainer").CanvasJSChart(options);
 	   console.log(data)
 	   let list = []
 	   data.forEach(items=>{
-		 // console.log("getting parking data")
-		  // console.log(items.locationcoordinates)
+		// console.log("getting parking data")
+		 // console.log(items.locationcoordinates)
 		   let coordinates = getcoordinates(items.locationcoordinates);
 		   let marker = getcentroid(coordinates)
 		  

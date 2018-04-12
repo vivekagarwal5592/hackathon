@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<style>
+#map {
+	height: 400px;
+	width: 100%;
+}
+</style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Traffic Analysis</title>
+<link rel="stylesheet"
+	href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<link rel="stylesheet" href="css/custom.css" />
+
+<!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"> -->
+
+
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css" />
+
+
+
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<nav class="navbar navbar-default">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<a class="navbar-brand" href="/">San Diego Smart Analysis</a>
+					</div>
+					<ul class="nav navbar-nav">
+						<li><a href="/">Home</a></li>
+						<li><a href="getparkinganalysis">Parking Analysis</a></li>
+						<li class="active"><a href="gettrafficanalysis">Traffic
+								Analysis</a></li>
+						<li><a href="locationanalysis">Location Analysis</a></li>
+						<li><a href="getfutureparkingspace">Future Parking</a></li>
+
+					</ul>
+				</div>
+			</nav>
+
+		</div>
+
+		<div class="row ">
+			<div class="col-md-4 parkingdetails">
+
+
+
+
+				<div class="form-group">
+					<select class="city form-control" onChange="">
+						<option value="Balboa Park">Balboa Park</option>
+						<option value="Bankers Hill">Bankers Hill</option>
+						<option value="Barrio Logan">Barrio Logan</option>
+						<option value="Bay Ho">Bay Ho</option>
+						<option value="Bay Park">Bay Park</option>
+						<option value="Birdland">Birdland</option>
+						<option value="Sherman Heights">Sherman Heights</option>
+						<option value="Wooded Area">Wooded Area</option>
+						<option value="Sorrento Valley">Sorrento Valley</option>
+						<option value="Palm City">Palm City</option>
+					</select> <label for="fromdate">From</label> <input type="text"
+						class="form-control" id="fromdate" name="fromdate" /> <label
+						for="todate">To</label> <input type="text" class="form-control"
+						id="todate" name="todate" /> <label for="fromtime">From</label> <select
+						id="fromtime" class=" form-control">
+						<option value="12:00 AM">12:00 AM</option>
+						<option value="12:15 AM">12:15 AM</option>
+						<option value="12:30 AM">12:30 AM</option>
+						<option value="12:45 AM">12:45 AM</option>
+						<option value="1:00 AM">1:00 AM</option>
+						<option value="1:15 AM">1:15 AM</option>
+						<option value="1:30 AM">1:30 AM</option>
+						<option value="1:45 AM">1:45 AM</option>
+						<option value="2:00 AM">2:00 AM</option>
+						<option value="2:15 AM">2:15 AM</option>
+						<option value="2:30 AM">2:30 AM</option>
+						<option value="2:45 AM">2:45 AM</option>
+					</select> <label for="totime">To</label> <select id="totime"
+						class="time form-control">
+						<option value="12:00 PM">12:00 PM</option>
+						<option value="12:15 PM">12:15 PM</option>
+						<option value="12:30 PM">12:30 PM</option>
+						<option value="12:45 PM">12:45 PM</option>
+						<option value="1:00 PM">1:00 PM</option>
+						<option value="1:15 PM">1:15 PM</option>
+						<option value="1:30 PM">1:30 PM</option>
+						<option value="1:45 PM">1:45 PM</option>
+						<option value="2:00 PM">2:00 PM</option>
+						<option value="2:15 PM">2:15 PM</option>
+						<option value="2:30 PM">2:30 PM</option>
+						<option value="2:45 PM">2:45 PM</option>
+					</select>
+
+					<button type="button" class="btn btn-info"
+						onclick="getlocationcoordinates(getlocationUids)"
+						style="margin-top: 7px;">Submit</button>
+				</div>
+
+
+
+			</div>
+
+
+			<div class="col-md-6 col-md-offset-2">
+
+				<div id="map"></div>
+
+			</div>
+
+
+			
+
+
+
+		</div>
+		<div style="margin:10px"></div>
+		<div class="row ">
+			
+			
+			<div class="col-md-6">
+				<div id="map2" style="height: 400px; width: 100%;"></div>
+
+				<span class='element1'>Number of cars spotted:</span> <span id="e1"
+					class="analytical-result"> </span><br /> <span class='element1'>Address:</span>
+				<span id="e3" class="analytical-result"> </span>
+
+			</div>
+			<div class="col-md-6 ">
+
+
+				<div id="chartContainer" style="height: 400px; width: 100%;"></div>
+
+
+			</div>
+			
+			
+		</div>
+		
+	</div>
+
+	<script async="async" defer="defer"
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD337K3FBoUIcvjTAovo91T3gnIHc6wSwc&amp;callback=initMap"></script>
+	<script src="js/traffic.js" ></script>
+</body>
+</html>

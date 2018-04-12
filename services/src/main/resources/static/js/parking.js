@@ -29,10 +29,11 @@ let  getlocationcoordinates = (callback)=> {
   let  getlocationUids = (latitude,longitude)=> {
 	  
 	  
-	  console.log(parseFloat(latitude+0.02)  + "," +parseFloat(longitude-0.02) )
-	   console.log(parseFloat(latitude-0.02)  + "," +parseFloat(longitude+0.02) )
+	 // console.log(parseFloat(latitude+0.02)  + "," +parseFloat(longitude-0.02) )
+	  // console.log(parseFloat(latitude-0.02)  + "," +parseFloat(longitude+0.02) )
 	  
 	  $(".locations").empty()
+	  $('#loading-image').show();
       $.ajax({
       type: "POST",
       dataType: "json",
@@ -51,7 +52,10 @@ let  getlocationcoordinates = (callback)=> {
       },
        error: function(jqXHR, textStatus, errorThrown){
     	   alert("Details about Location currently not available")
-    }
+    },
+    complete: function(){
+        $('#loading-image').hide();
+      }
     });
 }
 
@@ -135,9 +139,9 @@ return list;
 
 function changeMapLocation(latitude,longitude,list) {
 
-	console.log("latitude is "+latitude)
-	console.log("longitude is "+longitude)
-	console.log("list  is "+JSON.stringify(list))
+	//console.log("latitude is "+latitude)
+	//console.log("longitude is "+longitude)
+	//console.log("list  is "+JSON.stringify(list))
     
 	 var uluru = {lat: latitude, lng: longitude};
 	 var map = new google.maps.Map(document.getElementById('mapx'), { 

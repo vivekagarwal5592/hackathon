@@ -10,6 +10,7 @@ public class parkingsummary {
 	Integer TimeOverTwoHrs;
 	String locationcoordinates;
 	Map<String, Integer> numberOfCarsParked = new TreeMap<>();
+	String locationUid;
 
 	public parkingsummary() {
 		super();
@@ -47,5 +48,15 @@ public class parkingsummary {
 	public void setLocationcoordinates(String locationcoordinates) {
 		this.locationcoordinates = locationcoordinates;
 	}
+
+	public String getLocationUid() {
+		return locationUid;
+	}
+
+	public void setLocationUid(String locationUid) {
+		this.locationUid = locationUid;
+	}
+	
+	
 
 }
