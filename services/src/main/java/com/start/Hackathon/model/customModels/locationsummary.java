@@ -11,10 +11,19 @@ public class locationsummary {
 	Integer total_cars_parked;
 	String most_traffic_prone_location;
 	String most_number_of_cars_parked;
-	Map<String,Integer> traffic_chart = new HashMap<String,Integer>();
-	Map<String,Integer> parking_chart = new HashMap<String,Integer>();
+	Map<String, Integer> traffic_chart = new HashMap<String, Integer>();
+	Map<String, Integer> parking_chart = new HashMap<String, Integer>();
 	List<trafficsummary> trafficsummary = new ArrayList<trafficsummary>();
 	List<parkingsummary> parkingsummary = new ArrayList<parkingsummary>();
+	List<pedestrainsummary> pedestrainsummary = new ArrayList<pedestrainsummary>();
+
+	public List<pedestrainsummary> getPedestrainsummary() {
+		return pedestrainsummary;
+	}
+
+	public void setPedestrainsummary(List<pedestrainsummary> pedestrainsummary) {
+		this.pedestrainsummary = pedestrainsummary;
+	}
 
 	public Map<String, Integer> getParking_chart() {
 		return parking_chart;
@@ -86,11 +95,5 @@ public class locationsummary {
 	public void setParkingsummary(List<parkingsummary> parkingsummary) {
 		this.parkingsummary = parkingsummary;
 	}
-	
-	
-
-
-	
-	
 
 }

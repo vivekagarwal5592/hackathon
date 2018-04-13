@@ -2,80 +2,124 @@ $( function() {
   $( "#fromdate" ).datepicker();
   $( "#todate" ).datepicker();
   $( "#predictiondate").datepicker({
-	  altFormat: "mm-dd-yy"
+	  
   });
 
- // $('#datetimepicker1').datetimepicker();
-// getlocationcoordinates(getlocationUids);
+
 });
 
 
+let myFunction = () =>{
+	
+	getlocationcoordinates().then(result =>{
+		return getParkingSummary(result.latitude,result.longitude)	
+	}).then(data =>{
+		 renderparkingChart(data);
+	})
+	
+}
 
-let  getlocationcoordinates = (callback)=> {
 
- let geocoder = new google.maps.Geocoder;
-    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' /* $('#current_position').val() */}, function(results, status) {
-  if (status == google.maps.GeocoderStatus.OK) {
-   let  latitude = results[0].geometry.location.lat();
-     longitude = results[0].geometry.location.lng();
-   callback(latitude,longitude)
- }
+
+let myFunction2 = () =>{
+	
+	getlocationcoordinates().then(result =>{
+		return getTrafficSummary(result.latitude,result.longitude)	
+	}).then(data =>{
+		 renderparkingChart(data);
+	})
+	
+}
+
+
+
+let myFunction3 = () =>{
+	
+	getlocationcoordinates().then(result =>{
+		return getPedestrainSummary(result.latitude,result.longitude)	
+	}).then(data =>{
+		console.log(data)
+		// renderparkingChart(data);
+	})
+	
+}
+
+
+
+
+let  getlocationcoordinates = ()=> {
+
+	return new Promise((resolve, reject) =>{
+		let geocoder = new google.maps.Geocoder;
+	    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' }, function(results, status) {
+	  if (status == google.maps.GeocoderStatus.OK) {
+	   let  latitude = results[0].geometry.location.lat();
+	     longitude = results[0].geometry.location.lng();
+		
+	   resolve({latitude, longitude})  
+	}
+ 
+  // callback(latitude,longitude)
+ });
 });
 };
 
 
-let getLocationSummary = (latitude,longitude) =>{
+let getParkingSummary = (latitude,longitude) =>{
   
-	
-	let hourlyparking = false;
-	if($('#hourlyparking').is(':checked') ){
-		hourlyparking = true
-	}
-	
-	
-	if($('#fromdate').val() == '' || $('#todate').val() ==''){
-		alert("Please select date")
-	}
-	else{
-	   $.ajax({
-		      type: "POST",
-		      dataType: "json",
-		      url : "getparkingsummarycsv",
-		      data : {
-		        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
-		        "startts":$('#fromdate').val(),
-		        "endts": $('#todate').val(),
-		        "hourly": hourlyparking
-		      
-		      },
-		      success : function(data) {
-		
-		    	  console.log(data)
-		    	 // gettrafficheatmap(latitude,longitude,data.trafficsummary);
-		    	 // getparkingheatmap(latitude,longitude,data.parkingsummary);
-		    	
-		    	  
-		    	 // renderbarChart(data.trafficsummary);
-		    	  renderparkingChart(data);
-		    	  
-		    	/*
-				 * renderbarChart(data.traffic_chart)
-				 * renderparkingChart(data.parking_chart)
-				 */
-		      },
-		       error: function(jqXHR, textStatus, errorThrown){
-		    alert(textStatus);
-		    console.log(jqXHR.responseText)
-		    }
-		    });
+		return new Promise((resolve,reject)=>{
+			
+			
+			let hourlyparking = false;
+			if($('#hourlyparking').is(':checked') ){
+				hourlyparking = true
+			}
+			
+			if($('#fromdate').val() == '' || $('#todate').val() ==''){
+				alert("Please select date")
+			}
+			
+			
+			  $.ajax({
+			      type: "POST",
+			      dataType: "json",
+			      url : "getparkingsummarycsv",
+			      data : {
+			        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
+			        "startts":$('#fromdate').val(),
+			        "endts": $('#todate').val(),
+			        "hourly": hourlyparking
+			      
+			      },
+			      success : function(data) {
+			
+			    	  console.log(data)
+			    	 // gettrafficheatmap(latitude,longitude,data.trafficsummary);
+			    	 // getparkingheatmap(latitude,longitude,data.parkingsummary);
+			    	
+			    	  
+			    	 // renderbarChart(data.trafficsummary);
+			    	  resolve(data)
+			    	 
+			    	  
+			    	/*
+					 * renderbarChart(data.traffic_chart)
+					 * renderparkingChart(data.parking_chart)
+					 */
+			      },
+			       error: function(jqXHR, textStatus, errorThrown){
+			    alert(textStatus);
+			    console.log(jqXHR.responseText)
+			    }
+			    });
+			
+		})
 }
-	
-}
 
 
 
 
-let getLocationSummary2 = (latitude,longitude) =>{
+let getTrafficSummary = (latitude,longitude) =>{
 	  
 	
 	console.log($('#hourly').is(':checked') )
@@ -127,6 +171,72 @@ let getLocationSummary2 = (latitude,longitude) =>{
 }
 	
 }
+
+
+
+let getPedestrainSummary = (latitude,longitude) =>{
+	  
+	
+	return new Promise((resolve,reject) =>{
+		
+		console.log("I am in getPedestrain summary")
+		
+	
+	console.log($('#hourlypedestrain').is(':checked') )
+	
+	let hourly = false;
+	if($('#hourlypedestrain').is(':checked') ){
+		hourly = true
+	}
+	
+	
+	if($('#fromdate').val() == '' || $('#todate').val() ==''){
+		alert("Please select date")
+	}
+	
+	
+	
+	else{
+	   $.ajax({
+		      type: "POST",
+		      dataType: "json",
+		      url : "getpedestrainsummarycsv",
+		      data : {
+		        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
+		        "startts":$('#fromdate').val(),
+		        "endts": $('#todate').val(),
+		        "hourly":hourly
+		      
+		      },
+		      success : function(data) {
+		
+		    	  console.log(data)
+		    	  
+		    	  resolve(data)
+		    	 // gettrafficheatmap(latitude,longitude,data.trafficsummary);
+		    	 // getparkingheatmap(latitude,longitude,data.parkingsummary);
+		    	
+		    	  
+		    	 // renderbarChart(data.trafficsummary);
+		    	 // renderparkingChart(data);
+		    	  
+		    	/*
+				 * renderbarChart(data.traffic_chart)
+				 * renderparkingChart(data.parking_chart)
+				 */
+		      },
+		       error: function(jqXHR, textStatus, errorThrown){
+		    alert(textStatus);
+		    console.log(jqXHR.responseText)
+		    }
+		    });
+}
+	
+	})
+}
+
+
+
 
 
 

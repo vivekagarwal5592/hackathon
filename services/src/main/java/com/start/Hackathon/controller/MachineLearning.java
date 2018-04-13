@@ -22,13 +22,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.start.Hackathon.model.assets.PedestrainDetail;
 import com.start.Hackathon.model.assets.location;
 import com.start.Hackathon.model.assets.locationDetail;
 import com.start.Hackathon.model.customModels.locationsummary;
 import com.start.Hackathon.model.customModels.parkingDetails;
 import com.start.Hackathon.model.customModels.parkingsummary;
+import com.start.Hackathon.model.customModels.pedestrainsummary;
 import com.start.Hackathon.model.customModels.trafficsummary;
 import com.start.Hackathon.model.events.parkingevent;
+import com.start.Hackathon.model.events.pedestrainevent;
 import com.start.Hackathon.model.events.trafficevent;
 
 @RestController
@@ -58,7 +61,7 @@ public class MachineLearning {
 						HttpMethod.GET, getParkingHeaders(), locationDetail.class)
 				.getBody();
 
-		System.out.println(parkingDetail.getContent().length);
+		//System.out.println(parkingDetail.getContent().length);
 
 		List<parkingsummary> psummary = new ArrayList<parkingsummary>();
 		for (location l : parkingDetail.getContent()) {
@@ -72,6 +75,40 @@ public class MachineLearning {
 		downloadparkingsummarycsv(psummary);
 
 		return new ResponseEntity<List<parkingsummary>>(psummary, getResponseHeaders(), HttpStatus.CREATED);
+
+	}
+
+	@RequestMapping(value = "/getpedestrainsummarycsv", method = RequestMethod.POST)
+	public ResponseEntity<List<pedestrainsummary>> getpedestrainsummary(@RequestParam String startts,
+			@RequestParam String endts, @RequestParam String bbox,boolean hourly) {
+		
+		//System.out.println(bbox);
+		//System.out.println(startts);
+		//System.out.println(endts);
+		
+		System.out.println("I am in first line of get Pedestrian summary");
+
+		String url = "https://ic-metadata-service-sdhack.run.aws-usw02-pr.ice.predix.io/v2/metadata/";
+
+		PedestrainDetail pedestrainDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:WALKWAY&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getPedestrainHeaders(), PedestrainDetail.class)
+				.getBody();
+
+		System.out.println( pedestrainDetail.getContent().length);
+		List<pedestrainsummary> pedestrainsummary = new ArrayList<pedestrainsummary>();
+		for (location l : pedestrainDetail.getContent()) {
+			pedestrainsummary t = getPedestrainForLastTenDays(l.getLocationUid(), startts, endts,hourly).getBody();
+			if (t != null) {
+				pedestrainsummary.add(t);
+				(pedestrainsummary.get(pedestrainsummary.size() - 1)).setLocationcoordinates(l.getCoordinates());
+			}
+		}
+
+		System.out.println("I am going to download csv");
+		downloadpedestrainsummarycsv(pedestrainsummary);
+
+		return new ResponseEntity<List<pedestrainsummary>>(pedestrainsummary, getResponseHeaders(), HttpStatus.CREATED);
 
 	}
 
@@ -121,6 +158,29 @@ public class MachineLearning {
 		return new ResponseEntity<trafficsummary>(t, getResponseHeaders(), HttpStatus.CREATED);
 
 	}
+	
+	public ResponseEntity<pedestrainsummary> getPedestrainForLastTenDays(@RequestParam String pedestrain_loc,
+			@RequestParam String startts, @RequestParam String endts,boolean hourly) {
+		pedestrainsummary t = new pedestrainsummary();
+
+		String starttime = getdateinTimeStamp(startts);
+		String endtime = getdateinTimeStamp(endts);
+		
+		System.out.println("I am in first line of get Pedestrian for last 10 days");
+
+		while ((Long.parseLong(starttime) + 21600000) <= Long.parseLong(endtime)) {
+
+			pedestrainevent pedestrain = restTemplate.exchange(
+					url + "locations/" + pedestrain_loc + "/events?eventType=PEDEVT&" + "startTime=" + starttime
+							+ "&endTime=" + String.valueOf(Long.parseLong(starttime) + 21600000),
+					HttpMethod.GET, getPedestrainHeaders(), pedestrainevent.class).getBody();
+			getPedestrainSummary(t, pedestrain,hourly);
+			starttime = String.valueOf(Long.parseLong(starttime) + 21600000);
+		}
+
+		return new ResponseEntity<pedestrainsummary>(t, getResponseHeaders(), HttpStatus.CREATED);
+
+	}
 
 	public trafficsummary getTrafficSummary(trafficsummary t, trafficevent traffic, boolean hourly) {
 
@@ -147,6 +207,37 @@ public class MachineLearning {
 								+ traffic.getContent()[i].getMeasures().getVehicleCount());
 					} else {
 						t.getNumberOfCarsSpotted().put(d, traffic.getContent()[i].getMeasures().getVehicleCount());
+					}
+				}
+			}
+
+		}
+
+		return t;
+	}
+
+	
+
+	public pedestrainsummary getPedestrainSummary(pedestrainsummary t, pedestrainevent traffic,boolean hourly) {
+
+		if (traffic.getContent().length > 0) {
+
+			t.setLocationUid(traffic.getContent()[0].getLocationUid());
+
+			for (int i = 0; i <= traffic.getContent().length - 1; i++) {
+				t.setNoOfPeople(t.getNoOfPeople() + traffic.getContent()[i].getMeasures().getPedestrianCount());
+
+				if (traffic.getContent()[i].getTimestamp() != null) {
+					Date currentDate = new Date(Long.parseLong(traffic.getContent()[i].getTimestamp()));
+					
+					String d = hourly? new SimpleDateFormat("MM/dd/YYYY hh a").format(currentDate).toString():
+							 new SimpleDateFormat("MM/dd/YYYY").format(currentDate).toString();
+					// System.out.println(d);
+					if (t.getNumberOfCarsSpotted().containsKey(d)) {
+						t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d)
+								+ traffic.getContent()[i].getMeasures().getPedestrianCount());
+					} else {
+						t.getNumberOfCarsSpotted().put(d, traffic.getContent()[i].getMeasures().getPedestrianCount());
 					}
 				}
 			}
@@ -204,7 +295,7 @@ public class MachineLearning {
 
 		FileWriter fileWriter = null;
 		try {
-			fileWriter = new FileWriter("src/main/files/parkingdetail.csv",true);
+			fileWriter = new FileWriter("src/main/files/parkingdetail.csv", true);
 			for (parkingDetails p : objectuids) {
 				if (p.getTotaltime() != null) {
 					fileWriter.append(String.valueOf(p.getAssetUid()));
@@ -249,7 +340,7 @@ public class MachineLearning {
 		FileWriter fileWriter = null;
 		try {
 
-			fileWriter = new FileWriter("src/main/files/parkingsummary.csv",true);
+			fileWriter = new FileWriter("src/main/files/parkingsummary.csv", true);
 			for (parkingsummary p : objectuids) {
 
 				p.getNumberOfCarsParked();
@@ -296,7 +387,7 @@ public class MachineLearning {
 
 		FileWriter fileWriter = null;
 		try {
-			fileWriter = new FileWriter("src/main/files/trafficsummary.csv",true);
+			fileWriter = new FileWriter("src/main/files/trafficsummary.csv", true);
 			for (trafficsummary p : objectuids) {
 
 				for (Map.Entry<String, Integer> e : p.getNumberOfCarsSpotted().entrySet()) {
@@ -310,6 +401,49 @@ public class MachineLearning {
 					fileWriter.append(String.valueOf(p.getLocationUid()));
 					fileWriter.append(",");
 					fileWriter.append(String.valueOf(e.getKey()));
+					fileWriter.append(",");
+					fileWriter.append(String.valueOf(e.getKey()));
+					fileWriter.append(",");
+					fileWriter.append(String.valueOf(e.getValue()));
+					fileWriter.append(",");
+
+					fileWriter.append("\n");
+
+					// System.out.println("CSV file was created successfully !!!");
+				}
+			}
+		} catch (Exception e) {
+			// System.out.println("Error in CsvFileWriter !!!");
+			e.printStackTrace();
+		} finally {
+
+			try {
+				fileWriter.flush();
+				fileWriter.close();
+			} catch (IOException e) {
+				System.out.println("Error while flushing/closing fileWriter !!!");
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	public void downloadpedestrainsummarycsv(List<pedestrainsummary> objectuids) {
+
+		FileWriter fileWriter = null;
+		try {
+			fileWriter = new FileWriter("src/main/files/pedestrainsummary.csv", true);
+			for (pedestrainsummary p : objectuids) {
+
+				for (Map.Entry<String, Integer> e : p.getNumberOfCarsSpotted().entrySet()) {
+
+					fileWriter.append(String.valueOf(p.getNoOfPeople()));
+					fileWriter.append(",");
+					fileWriter.append(String.valueOf(getXcoordinate(p.getLocationcoordinates())));
+					fileWriter.append(",");
+					fileWriter.append(String.valueOf(getYcoordinate(p.getLocationcoordinates())));
+					fileWriter.append(",");
+					fileWriter.append(String.valueOf(p.getLocationUid()));
 					fileWriter.append(",");
 					fileWriter.append(String.valueOf(e.getKey()));
 					fileWriter.append(",");
@@ -451,6 +585,14 @@ public class MachineLearning {
 		responseHeaders.set("Access-Control-Allow-Origin", "*");
 		return responseHeaders;
 
+	}
+
+	public HttpEntity<String> getPedestrainHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + authorization);
+		headers.set("Predix-Zone-Id", "SD-IE-PEDESTRIAN");
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+		return entity;
 	}
 
 	public List<parkingDetails> getparkingoutdetail(parkingevent pe, List<parkingDetails> pk) {

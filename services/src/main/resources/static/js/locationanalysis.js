@@ -27,10 +27,26 @@ let getLocationSummary = (latitude,longitude) =>{
 		alert("Please select date")
 	}
 	else{
+		
+		getParkingSummary(latitude,longitude);
+		getTrafficSummary(latitude,longitude)
+		  
+}
+	
+}
+
+
+
+
+let getParkingSummary = (latitude,longitude) =>{
+		 
+		  $('#loading-image2').show();
+    	  $('#chartContainer2').hide();
+    	
 	   $.ajax({
 		      type: "POST",
 		      dataType: "json",
-		      url : "getlocationsummary",
+		      url : "getparkingsummary",
 		      data : {
 		        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
 		        "startts":$('#fromdate').val(),
@@ -39,13 +55,14 @@ let getLocationSummary = (latitude,longitude) =>{
 		      },
 		      success : function(data) {
 		
-		    	  gettrafficheatmap(latitude,longitude,data.trafficsummary);
+		    	//  renderbarChart(data.trafficsummary);
+		    	  renderparkingChart(data.parkingsummary);
+		    	  
+		    	//  gettrafficheatmap(latitude,longitude,data.trafficsummary);
 		    	  getparkingheatmap(latitude,longitude,data.parkingsummary);
 		    	
 		    	  
-		    	  renderbarChart(data.trafficsummary);
-		    	  renderparkingChart(data.parkingsummary);
-		    	  
+		    	 
 		    	/*
 				 * renderbarChart(data.traffic_chart)
 				 * renderparkingChart(data.parking_chart)
@@ -54,11 +71,120 @@ let getLocationSummary = (latitude,longitude) =>{
 		       error: function(jqXHR, textStatus, errorThrown){
 		    alert(textStatus);
 		    console.log(jqXHR.responseText)
-		    }
+		    },
+		    complete: function(){
+		    	 
+				  $('#loading-image2').hide();
+		    	  $('#chartContainer2').show();
+		       
+		      }
 		    });
-}
+
 	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+let getTrafficSummary = (latitude,longitude) =>{
+	  
+	
+		
+		 
+		  $('#loading-image3').show();
+    	  $('#chartContainer').hide();
+    	
+    	
+	   $.ajax({
+		      type: "POST",
+		      dataType: "json",
+		      url : "gettrafficsummary",
+		      data : {
+		        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
+		        "startts":$('#fromdate').val(),
+		        "endts": $('#todate').val()
+		      
+		      },
+		      success : function(data) {
+		
+		    	  renderbarChart(data.trafficsummary);
+		    	//  renderparkingChart(data.parkingsummary);
+		    	  
+		    	  gettrafficheatmap(latitude,longitude,data.trafficsummary);
+		    //	  getparkingheatmap(latitude,longitude,data.parkingsummary);
+		    	
+		    	  
+		    	 
+		    	/*
+				 * renderbarChart(data.traffic_chart)
+				 * renderparkingChart(data.parking_chart)
+				 */
+		      },
+		       error: function(jqXHR, textStatus, errorThrown){
+		    alert(textStatus);
+		    console.log(jqXHR.responseText)
+		    },
+		    complete: function(){
+		    	  $('#loading-image3').hide();
+		    	  $('#chartContainer').show();
+		       
+		      }
+		    });
+
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

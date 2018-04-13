@@ -32,3 +32,14 @@ a:hover{
 	height:350px;
 	width:100%;
 }
+
+.loading-image-div{
+	display: none;
+	text-align:center;
+}
+
+.loading-image{
+	width: 100px; 
+	height: 100px;
+	margin-top:20%
+}

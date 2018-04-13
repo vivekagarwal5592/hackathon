@@ -50,57 +50,11 @@
 						<option value="Air and space museum">Air and space museum</option>
 						<option value="San diego Civic theater">San diego Civic
 							theater</option>
-						<!--<option value="Barrio Logan">Barrio Logan</option>
-						 	<option value="Mid City">Mid City</option>
-						<option value="North Park">North Park</option>
-						<option value="Wooded Area">Wooded Area</option>
-						<option value="Sorrento Valley">Sorrento Valley</option>
-						<option value="Palm City">Palm City</option>
-						<option value="Bay Ho">Bay Ho</option>
-						<option value="Bay Park">Bay Park</option>
-						<option value="Birdland">Birdland</option>
-						<option value="Mira Mesa">Mira Mesa</option>
-						<option value="Miramar">Miramar</option>
-						<option value="kearny messa">kearny messa</option>
-						<option value="clairmont">clairmont</option>
-						<option value="Northeastern">Northeastern</option>
-						<option value="Old Town">Old Town</option> -->
 
-					</select> <label for="fromdate">From</label> <input type="text"
-						class="form-control" id="fromdate" name="fromdate" /> <label
-						for="todate">To</label> <input type="text" class="form-control"
-						id="todate" name="todate" /> <label for="fromtime">From</label> <select
-						id="fromtime" class=" form-control">
-						<option value="12:00 AM">12:00 AM</option>
-						<option value="12:15 AM">12:15 AM</option>
-						<option value="12:30 AM">12:30 AM</option>
-						<option value="12:45 AM">12:45 AM</option>
-						<option value="1:00 AM">1:00 AM</option>
-						<option value="1:15 AM">1:15 AM</option>
-						<option value="1:30 AM">1:30 AM</option>
-						<option value="1:45 AM">1:45 AM</option>
-						<option value="2:00 AM">2:00 AM</option>
-						<option value="2:15 AM">2:15 AM</option>
-						<option value="2:30 AM">2:30 AM</option>
-						<option value="2:45 AM">2:45 AM</option>
-					</select> <label for="totime">To</label> <select id="totime"
-						class="time form-control">
-						<option value="12:00 PM">12:00 PM</option>
-						<option value="12:15 PM">12:15 PM</option>
-						<option value="12:30 PM">12:30 PM</option>
-						<option value="12:45 PM">12:45 PM</option>
-						<option value="1:00 PM">1:00 PM</option>
-						<option value="1:15 PM">1:15 PM</option>
-						<option value="1:30 PM">1:30 PM</option>
-						<option value="1:45 PM">1:45 PM</option>
-						<option value="2:00 PM">2:00 PM</option>
-						<option value="2:15 PM">2:15 PM</option>
-						<option value="2:30 PM">2:30 PM</option>
-						<option value="2:45 PM">2:45 PM</option>
 					</select>
 
-					<button type="button" class="btn btn-info"
-						onclick="getlocationcoordinates(getlocationUids)"
+
+					<button type="button" class="btn btn-info" onclick="myFunction()"
 						style="margin-top: 7px;">Submit</button>
 
 				</div>
@@ -108,39 +62,38 @@
 			</div>
 
 			<div class="col-md-6 col-md-offset-2">
-				<div id="loading-image" style="display:none">
-					<img style="width:200px;height:150px;" src="img/loading.gif" />
+				<div class="loading-image-div" id="loading-image">
+					<img class="loading-image" src="img/loading.gif" />
 				</div>
-				<div id="map" style="height: 400px; width: 100%;">Location Map</div>
+				<div id="map" style="height: 400px; width: 100%;">Location Map
 			</div>
 		</div>
+	</div>
 
-		<div style="margin: 10px;"></div>
+	<div style="margin: 10px;"></div>
 
-		<div class="row">
-
-
-			<div class="col-md-6 ">
-				<div id="mapx" style="height: 400px; width: 100%;"></div>
+	<div class="row">
 
 
-				<span class='element1'>Number of violations:</span> <span id="e1"
-					class="analytical-result"> </span> <br /> <span class='element1'>Number
-					cars spotted:</span> <span id="e2" class="analytical-result"> </span> <br />
-				<span class='element1'>Address:</span> <span id="e3"
-					class="analytical-result"> </span> <br />
-			</div>
+		<div class="col-md-6 ">
+			<div id="mapx" style="height: 400px; width: 100%;"></div>
+			<span class='element1'>Number of violations:</span> <span id="e1"
+				class="analytical-result"> </span> <br /> <span class='element1'>Number
+				cars spotted:</span> <span id="e2" class="analytical-result"> </span> <br />
+			<span class='element1'>Address:</span> <span id="e3"
+				class="analytical-result"> </span> <br />
+		</div>
 
 
-			<div class="col-md-6 ">
+		<div class="col-md-6 ">
 
 
-				<div id="chartContainer" style="height: 400px; width: 100%;"></div>
+			<div id="chartContainer" style="height: 400px; width: 100%;"></div>
 
-
-			</div>
 
 		</div>
+
+	</div>
 	</div>
 
 

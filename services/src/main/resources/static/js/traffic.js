@@ -18,9 +18,13 @@ let  getlocationcoordinates = (callback)=> {
    callback(latitude,longitude)
  }
 });
-};
+}
+
   let  getlocationUids = (latitude,longitude)=> {
-	  $(".locations").empty()
+	// $(".locations").empty()
+	  
+	    $('#loading-image').show();
+		  $('#map').hide();
       $.ajax({
       type: "POST",
       dataType: "json",
@@ -30,8 +34,7 @@ let  getlocationcoordinates = (callback)=> {
 
       },
       success : function(data) {
-  // i=0
-        
+
         data.content.forEach(item=>{
         	
         	 let pDetails = []
@@ -41,16 +44,18 @@ let  getlocationcoordinates = (callback)=> {
  	        
  	         changeMapLocationLoop(pDetails,latitude,longitude)
         	
-       // $(".locations").append(`<a
-		// onclick='trafficdetails("${item.locationUid}")'>Traffic Lane ${i}
-		// </a><br />`);
-         // i +=1;
+    
         })
       },
        error: function(jqXHR, textStatus, errorThrown){
     alert(textStatus);
-    }
+    },
+    complete: function(){
+        $('#loading-image').hide();
+        $('#map').show();
+      }
     });
+ 
 }
 
 let  trafficdetails = (locationUid)=> {
@@ -62,7 +67,10 @@ let  trafficdetails = (locationUid)=> {
     	alert("Please enter the date and the time")
     }
     else{
-    	
+    
+    	  $('#traffic-loading-image').show();
+    	  $('#chartContainer').hide();
+    	  
   $.ajax({
   type: "POST",
   dataType: "json",
@@ -83,7 +91,12 @@ if(data !=null){
   },
    error: function(jqXHR, textStatus, errorThrown){
 alert("No data for your search");
-}
+},
+complete: function(){
+    $('#traffic-loading-image').hide();
+    $('#chartContainer').show();
+   
+  }
 });
 
 // locationdetails(locationUid)

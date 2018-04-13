@@ -6,24 +6,31 @@ $( function() {
 // getlocationcoordinates(getlocationUids);
 });
 
+let myFunction = () =>{
+	 getlocationcoordinates().then(result=>{
+		 return  getlocationUids(result.latitude,result.longitude)
+	 }).then(result=>{
+		 changeMapLocationLoop(result.pDetails,result.latitude,result.longitude)
+	 })
+	
+}
 
 
-let  getlocationcoordinates = (callback)=> {
 
-  // let startts = $('#fromdate').val();
-  // let endts = $('#todate').val();
-  //
-  // console.log(startts)
-  // console.log(endts)
+let  getlocationcoordinates = ()=> {
+	
+	return new Promise ((resolve,reject)=>{
+		 let geocoder = new google.maps.Geocoder;
+		    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' /* $('#current_position').val() */}, function(results, status) {
+		  if (status == google.maps.GeocoderStatus.OK) {
+		   let  latitude = results[0].geometry.location.lat();
+		     longitude = results[0].geometry.location.lng();
+		   resolve({latitude,longitude})
+		 
+		 }
+	})
 
- let geocoder = new google.maps.Geocoder;
-    geocoder.geocode( { 'address': $( ".city" ).val() + 'San Diego' /* $('#current_position').val() */}, function(results, status) {
-  if (status == google.maps.GeocoderStatus.OK) {
-   let  latitude = results[0].geometry.location.lat();
-     longitude = results[0].geometry.location.lng();
-   callback(latitude,longitude)
-  // markarea(latitude,longitude)
- }
+
 });
 };
   let  getlocationUids = (latitude,longitude)=> {
@@ -32,31 +39,42 @@ let  getlocationcoordinates = (callback)=> {
 	 // console.log(parseFloat(latitude+0.02)  + "," +parseFloat(longitude-0.02) )
 	  // console.log(parseFloat(latitude-0.02)  + "," +parseFloat(longitude+0.02) )
 	  
-	  $(".locations").empty()
-	  $('#loading-image').show();
-      $.ajax({
-      type: "POST",
-      dataType: "json",
-      url : "getAllLocationswithinbbox",
-      data : {
-        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude-0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude+0.02)
+	  return new Promise((resolve,reject)=>{
+		  
+		 // $(".locations").empty()
+		  $('#loading-image').show();
+		  $('#map').hide();
+	      $.ajax({
+	      type: "POST",
+	      dataType: "json",
+	      url : "getAllLocationswithinbbox",
+	      data : {
+	        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude-0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude+0.02)
 
-      },
-      success : function(data) {
-    	 let pDetails = []
-    	        data.content.forEach(item=>{
-    	        	pDetails.push(locationdetails(item))
-    	         })  
-    	        
-    	         changeMapLocationLoop(pDetails,latitude,longitude)
-      },
-       error: function(jqXHR, textStatus, errorThrown){
-    	   alert("Details about Location currently not available")
-    },
-    complete: function(){
-        $('#loading-image').hide();
-      }
-    });
+	      },
+	      success : function(data) {
+	    	 let pDetails = []
+	    	        data.content.forEach(item=>{
+	    	        	pDetails.push(locationdetails(item))
+	    	         })  
+	    	        
+	    	         resolve({pDetails,latitude,longitude})
+	    	        
+	      },
+	       error: function(jqXHR, textStatus, errorThrown){
+	    	   alert("Details about Location currently not available")
+	    },
+	    complete: function(){
+	        $('#loading-image').hide();
+	        $('#map').show();
+	      }
+	    });
+		  
+		  
+		  
+	  })
+	  
+	
 }
 
 let  parkingdetails = (locationUid)=> {
@@ -98,14 +116,7 @@ let  locationdetails = (ldetails)=> {
 let list = getcoordinates(ldetails.coordinates)
 let xy = getcentroid(list)
 
-
- return {'list':list,'latitude':xy.x,'longitude':xy.y,'locationUid':ldetails.locationUid}
-
-// getaddressForGeoCode(data.x_coordinate,data.y_coordinate,function(result){
-	// document.getElementById("e3").innerHTML = result;
-
-
-// }
+return {'list':list,'latitude':xy.x,'longitude':xy.y,'locationUid':ldetails.locationUid}
 }
 
 let getcentroid = (list)=>{
@@ -203,10 +214,10 @@ function changeMapLocationLoop(locationdetails,centerx,centery,list) {
     	  
     	  marker.addListener('click', function() {
     	      	parkingdetails(marker.locationUid)
-    	      	getaddressForGeoCode(marker.x,marker.y,function(result){
-    	      	document.getElementById("e3").innerHTML = result;
-    	      	changeMapLocation(marker.x,marker.y,items.list) 
-    	      		})
+    	      	getaddressForGeoCode(marker.x,marker.y).then(result=>{
+    	      		document.getElementById("e3").innerHTML = result;
+        	      	changeMapLocation(marker.x,marker.y,items.list) 
+    	      	})
     	         });
           
           marker.setMap(map) 
@@ -237,20 +248,24 @@ function initMap() {
 
 
    let getaddressForGeoCode = (latitude,longitude,callback) => {
-     let geocoder = new google.maps.Geocoder;
-     var latlng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
-         geocoder.geocode( {'location': latlng}, function(results, status) {
+	   
+	   return new Promise((resolve,reject)=>{
+		   let geocoder = new google.maps.Geocoder;
+		     var latlng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
+		         geocoder.geocode( {'location': latlng}, function(results, status) {
 
-       if (status == google.maps.GeocoderStatus.OK) {
-    	   callback(results[0].formatted_address)
-      }
+		       if (status == google.maps.GeocoderStatus.OK) {
+		    	  resolve(results[0].formatted_address)
+		      }
+	   })
+    
      });
    }
 
 
 
 
-   function renderChart(data) {
+ function renderChart(data) {
 
 console.log(data)
 let list = []

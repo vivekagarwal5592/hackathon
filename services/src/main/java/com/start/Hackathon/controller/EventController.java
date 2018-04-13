@@ -31,14 +31,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.start.Hackathon.model.assets.PedestrainDetail;
 import com.start.Hackathon.model.assets.location;
 import com.start.Hackathon.model.assets.locationDetail;
 import com.start.Hackathon.model.customModels.locationsummary;
 import com.start.Hackathon.model.customModels.parkingDetails;
 import com.start.Hackathon.model.customModels.parkingsummary;
+import com.start.Hackathon.model.customModels.pedestrainsummary;
 import com.start.Hackathon.model.customModels.trafficsummary;
 import com.start.Hackathon.model.events.PointCoordinate;
 import com.start.Hackathon.model.events.parkingevent;
+import com.start.Hackathon.model.events.pedestrainevent;
 import com.start.Hackathon.model.events.trafficevent;
 
 @RestController
@@ -167,14 +170,89 @@ public class EventController {
 		lsummary.setParkingsummary(psummary);
 		lsummary.setTrafficsummary(tsummary);
 
-		System.out.println("I am going to download csv");
-		// downloadcsv(psummary);
-		// getLocationSummary(tsummary, psummary);
+		return new ResponseEntity<locationsummary>(lsummary, getResponseHeaders(), HttpStatus.CREATED);
+
+	}
+
+	@RequestMapping(value = "/getparkingsummary", method = RequestMethod.POST)
+	public ResponseEntity<locationsummary> getparkingsummary(@RequestParam String startts, @RequestParam String endts,
+			@RequestParam String bbox) {
+
+		String url = "https://ic-metadata-service-sdhack.run.aws-usw02-pr.ice.predix.io/v2/metadata/";
+		locationDetail parkingDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:PARKING_ZONE&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getParkingHeaders(), locationDetail.class)
+				.getBody();
+
+		List<parkingsummary> psummary = new ArrayList<parkingsummary>();
+		for (location l : parkingDetail.getContent()) {
+			parkingsummary p = getPKINForLastTendays(l.getLocationUid(), startts, endts).getBody();
+			if (p.getLocationUid() != null) {
+				psummary.add(p);
+			}
+
+		}
+
+		locationsummary lsummary = new locationsummary();
+		lsummary.setParkingsummary(psummary);
 
 		return new ResponseEntity<locationsummary>(lsummary, getResponseHeaders(), HttpStatus.CREATED);
 
-		// return restoperations.getForObject(url,companydetails.class);
-		// return ;
+	}
+
+	@RequestMapping(value = "/gettrafficsummary", method = RequestMethod.POST)
+	public ResponseEntity<locationsummary> gettrafficsummary(@RequestParam String startts, @RequestParam String endts,
+			@RequestParam String bbox) {
+
+		String url = "https://ic-metadata-service-sdhack.run.aws-usw02-pr.ice.predix.io/v2/metadata/";
+
+		locationDetail trafficDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:TRAFFIC_LANE&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getTrafficHeaders(), locationDetail.class)
+				.getBody();
+
+		List<trafficsummary> tsummary = new ArrayList<trafficsummary>();
+		for (location l : trafficDetail.getContent()) {
+			trafficsummary t = getTrafficForLastTenDays(l.getLocationUid(), startts, endts).getBody();
+			if (t != null) {
+				tsummary.add(t);
+				(tsummary.get(tsummary.size() - 1)).setLocationcoordinates(l.getCoordinates());
+			}
+		}
+
+		locationsummary lsummary = new locationsummary();
+		lsummary.setTrafficsummary(tsummary);
+
+		return new ResponseEntity<locationsummary>(lsummary, getResponseHeaders(), HttpStatus.CREATED);
+
+	}
+
+	@RequestMapping(value = "/getpedestrainummary", method = RequestMethod.POST)
+	public ResponseEntity<locationsummary> getpedestrainsummary(@RequestParam String startts,
+
+			@RequestParam String endts, @RequestParam String bbox) {
+
+		String url = "https://ic-metadata-service-sdhack.run.aws-usw02-pr.ice.predix.io/v2/metadata/";
+
+		PedestrainDetail pedestrainDetail = restTemplate
+				.exchange(url + "locations/search?q=locationType:PEDEVT&bbox=" + bbox + "&page=0&size=50",
+						HttpMethod.GET, getPedestrainHeaders(), PedestrainDetail.class)
+				.getBody();
+
+		List<pedestrainsummary> pedestrainsummary = new ArrayList<pedestrainsummary>();
+		for (location l : pedestrainDetail.getContent()) {
+			pedestrainsummary t = getPedestrainForLastTenDays(l.getLocationUid(), startts, endts).getBody();
+			if (t != null) {
+				pedestrainsummary.add(t);
+				(pedestrainsummary.get(pedestrainsummary.size() - 1)).setLocationcoordinates(l.getCoordinates());
+			}
+		}
+
+		locationsummary lsummary = new locationsummary();
+		lsummary.setPedestrainsummary(pedestrainsummary);
+
+		return new ResponseEntity<locationsummary>(lsummary, getResponseHeaders(), HttpStatus.CREATED);
+
 	}
 
 	@RequestMapping(value = "/getTrafficForLastTendays", method = RequestMethod.POST)
@@ -199,6 +277,28 @@ public class EventController {
 
 	}
 
+	@RequestMapping(value = "/getPedestrainForLastTendays", method = RequestMethod.POST)
+	public ResponseEntity<pedestrainsummary> getPedestrainForLastTenDays(@RequestParam String pedestrain_loc,
+			@RequestParam String startts, @RequestParam String endts) {
+		pedestrainsummary t = new pedestrainsummary();
+
+		String starttime = getdateinTimeStamp(startts);
+		String endtime = getdateinTimeStamp(endts);
+
+		while ((Long.parseLong(starttime) + 21600000) <= Long.parseLong(endtime)) {
+
+			pedestrainevent pedestrain = restTemplate.exchange(
+					url + "locations/" + pedestrain_loc + "/events?eventType=TFEVT&" + "startTime=" + starttime
+							+ "&endTime=" + String.valueOf(Long.parseLong(starttime) + 21600000),
+					HttpMethod.GET, getTrafficHeaders(), pedestrainevent.class).getBody();
+			getPedestrainSummary(t, pedestrain);
+			starttime = String.valueOf(Long.parseLong(starttime) + 21600000);
+		}
+
+		return new ResponseEntity<pedestrainsummary>(t, getResponseHeaders(), HttpStatus.CREATED);
+
+	}
+
 	public HttpHeaders getResponseHeaders() {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Access-Control-Allow-Origin", "*");
@@ -219,6 +319,14 @@ public class EventController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "Bearer " + authorization);
 		headers.set("Predix-Zone-Id", "SD-IE-TRAFFIC");
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+		return entity;
+	}
+
+	public HttpEntity<String> getPedestrainHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + authorization);
+		headers.set("Predix-Zone-Id", "SD-IE-PEDESTRIAN");
 		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 		return entity;
 	}
@@ -411,6 +519,33 @@ public class EventController {
 								+ traffic.getContent()[i].getMeasures().getVehicleCount());
 					} else {
 						t.getNumberOfCarsSpotted().put(d, traffic.getContent()[i].getMeasures().getVehicleCount());
+					}
+				}
+			}
+
+		}
+
+		return t;
+	}
+
+	public pedestrainsummary getPedestrainSummary(pedestrainsummary t, pedestrainevent traffic) {
+
+		if (traffic.getContent().length > 0) {
+
+			t.setLocationUid(traffic.getContent()[0].getLocationUid());
+
+			for (int i = 0; i <= traffic.getContent().length - 1; i++) {
+				t.setNoOfPeople(t.getNoOfPeople() + traffic.getContent()[i].getMeasures().getPedestrianCount());
+
+				if (traffic.getContent()[i].getTimestamp() != null) {
+					Date currentDate = new Date(Long.parseLong(traffic.getContent()[i].getTimestamp()));
+					String d = new SimpleDateFormat("dd-hh a").format(currentDate).toString();
+					// System.out.println(d);
+					if (t.getNumberOfCarsSpotted().containsKey(d)) {
+						t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d)
+								+ traffic.getContent()[i].getMeasures().getPedestrianCount());
+					} else {
+						t.getNumberOfCarsSpotted().put(d, traffic.getContent()[i].getMeasures().getPedestrianCount());
 					}
 				}
 			}
