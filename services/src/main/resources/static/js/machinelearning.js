@@ -121,54 +121,62 @@ let getParkingSummary = (latitude,longitude) =>{
 
 let getTrafficSummary = (latitude,longitude) =>{
 	  
-	
-	console.log($('#hourly').is(':checked') )
-	
-	let hourly = false;
-	if($('#hourly').is(':checked') ){
-		hourly = true
-	}
-	
-	
-	if($('#fromdate').val() == '' || $('#todate').val() ==''){
-		alert("Please select date")
-	}
-	
-	
-	
-	else{
-	   $.ajax({
-		      type: "POST",
-		      dataType: "json",
-		      url : "gettrafficsummarycsv",
-		      data : {
-		        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
-		        "startts":$('#fromdate').val(),
-		        "endts": $('#todate').val(),
-		        "hourly":hourly
-		      
-		      },
-		      success : function(data) {
+	return new Promise((resolve,reject)=>{
 		
-		    	  console.log(data)
-		    	 // gettrafficheatmap(latitude,longitude,data.trafficsummary);
-		    	 // getparkingheatmap(latitude,longitude,data.parkingsummary);
-		    	
-		    	  
-		    	 // renderbarChart(data.trafficsummary);
-		    	 // renderparkingChart(data);
-		    	  
-		    	/*
-				 * renderbarChart(data.traffic_chart)
-				 * renderparkingChart(data.parking_chart)
-				 */
-		      },
-		       error: function(jqXHR, textStatus, errorThrown){
-		    alert(textStatus);
-		    console.log(jqXHR.responseText)
-		    }
-		    });
-}
+		console.log($('#hourly').is(':checked') )
+		
+		let hourly = false;
+		if($('#hourly').is(':checked') ){
+			hourly = true
+		}
+		
+		
+		if($('#fromdate').val() == '' || $('#todate').val() ==''){
+			alert("Please select date")
+		}
+		
+		
+		
+		else{
+		   $.ajax({
+			      type: "POST",
+			      dataType: "json",
+			      url : "gettrafficsummarycsv",
+			      data : {
+			        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude+0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude-0.02),
+			        "startts":$('#fromdate').val(),
+			        "endts": $('#todate').val(),
+			        "hourly":hourly
+			      
+			      },
+			      success : function(data) {
+			
+			    	  console.log(data)
+			    	  
+			    	  resolve(data)
+			    	 // gettrafficheatmap(latitude,longitude,data.trafficsummary);
+			    	 // getparkingheatmap(latitude,longitude,data.parkingsummary);
+			    	
+			    	  
+			    	 // renderbarChart(data.trafficsummary);
+			    	 // renderparkingChart(data);
+			    	  
+			    	/*
+					 * renderbarChart(data.traffic_chart)
+					 * renderparkingChart(data.parking_chart)
+					 */
+			      },
+			       error: function(jqXHR, textStatus, errorThrown){
+			    alert(textStatus);
+			    console.log(jqXHR.responseText)
+			    }
+			    });
+	}
+		
+		
+	})
+	
+
 	
 }
 
@@ -195,7 +203,7 @@ let getPedestrainSummary = (latitude,longitude) =>{
 	}
 	
 	
-	
+
 	else{
 	   $.ajax({
 		      type: "POST",
