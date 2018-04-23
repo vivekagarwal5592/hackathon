@@ -233,8 +233,8 @@ public class MachineLearning {
 				if (traffic.getContent()[i].getTimestamp() != null) {
 					Date currentDate = new Date(Long.parseLong(traffic.getContent()[i].getTimestamp()));
 
-					String d = hourly ? new SimpleDateFormat("MM/dd/YYYY hh a").format(currentDate).toString()
-							: new SimpleDateFormat("MM/dd/YYYY").format(currentDate).toString();
+					String d = hourly ? new SimpleDateFormat("MM/dd/yyyy hh a").format(currentDate).toString()
+							: new SimpleDateFormat("MM/dd/yyyy").format(currentDate).toString();
 					// System.out.println(d);
 					if (t.getNumberOfCarsSpotted().containsKey(d)) {
 						t.getNumberOfCarsSpotted().put(d, t.getNumberOfCarsSpotted().get(d)

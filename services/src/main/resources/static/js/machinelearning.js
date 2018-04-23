@@ -1,12 +1,168 @@
 $( function() {
   $( "#fromdate" ).datepicker();
   $( "#todate" ).datepicker();
-  $( "#predictiondate").datepicker({
-	  
-  });
+  $( "#predictiondate").datepicker();
 
 
 });
+
+
+let  getfutureprediction =(locationUid)=>{
+	   
+	console.log(locationUid)
+	date = $("#predictiondate").val();
+	datettime = date + " " +  $('#predictiontime').val();
+	   console.log(datettime)
+	   $.ajax({
+		  
+		   type: "GET",
+		   dataType: "json",
+		   url : "https://volcanotest.run.aws-usw02-pr.ice.predix.io/api/1.0/parkingprediction",
+		   data : {
+			  datetime: datettime,
+			  locationUid:locationUid
+		   },
+		   success : function(data) {
+		document.getElementById("prediction").innerHTML = "Parking Prediction: "+ data.result;
+			 console.log(data)
+		   },
+		 error: function(jqXHR, textStatus, errorThrown){
+		 alert(textStatus);
+		 console.log(jqXHR.responseText)
+		 }
+		 }); 
+}
+
+
+let getAllLocations = () =>{
+	 getlocationcoordinates().then(result=>{
+		 return  getlocationUids(result.latitude,result.longitude)
+	 }).then(result=>{
+		 changeMapLocationLoop(result.pDetails,result.latitude,result.longitude)
+	 })
+	
+}
+
+
+
+function changeMapLocationLoop(locationdetails,centerx,centery,list) {
+
+	 var uluru = {lat:centerx, lng: centery};
+	    var map = new google.maps.Map(document.getElementById('map'), {
+	      zoom: 13,
+	      center: uluru,
+	// mapTypeId: 'satellite'
+	    });
+	
+	
+	  var cityCircle = new google.maps.Circle({
+         strokeColor: '#FF0000',
+         strokeOpacity: 0.8,
+         strokeWeight: 2,
+         fillColor: '#FF0000',
+         fillOpacity: 0.35,
+         map: map,
+         center: uluru,
+         radius:   3000
+       });
+
+     cityCircle.setMap(map);
+     
+   
+     locationdetails.forEach(items=>{
+   	  var marker = new google.maps.Marker({
+             position:  {lat:items.latitude, lng: items.longitude},
+             map: map,
+             locationUid:items.locationUid,
+             lanecoordinates:items.list,
+             x:items.latitude,
+             y: items.longitude
+           });
+   	  
+   	  marker.addListener('click', function() {
+   		getfutureprediction(marker.locationUid)
+   		//changeMapLocation(marker.x,marker.y,items.list) 
+   	      	getaddressForGeoCode(marker.x,marker.y).then(result=>{
+   	      		document.getElementById("e3").innerHTML = "Address: "+result;
+       	      	
+   	      	})
+   	         });
+         
+         marker.setMap(map) 
+     })
+    
+ }
+
+let getaddressForGeoCode = (latitude,longitude,callback) => {
+	   
+	   return new Promise((resolve,reject)=>{
+		   let geocoder = new google.maps.Geocoder;
+		     var latlng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
+		         geocoder.geocode( {'location': latlng}, function(results, status) {
+
+		       if (status == google.maps.GeocoderStatus.OK) {
+		    	  resolve(results[0].formatted_address)
+		      }
+	   })
+ 
+  });
+}
+
+
+
+
+let  getlocationUids = (latitude,longitude)=> {
+	  
+	  
+	 // console.log(parseFloat(latitude+0.02) + ","
+		// +parseFloat(longitude-0.02) )
+	  // console.log(parseFloat(latitude-0.02) + ","
+		// +parseFloat(longitude+0.02) )
+	  
+	  return new Promise((resolve,reject)=>{
+		  
+		 // $(".locations").empty()
+		  $('#loading-image').show();
+		  $('#map').hide();
+	      $.ajax({
+	      type: "POST",
+	      dataType: "json",
+	      url : "getAllLocationswithinbbox",
+	      data : {
+	        "bbox":parseFloat(latitude+0.02) + ':' + parseFloat(longitude-0.02) + ','+ parseFloat(latitude-0.02) + ':' + parseFloat(longitude+0.02)
+
+	      },
+	      success : function(data) {
+	    	 let pDetails = []
+	    	        data.content.forEach(item=>{
+	    	        	pDetails.push(locationdetails(item))
+	    	         })  
+	    	        
+	    	         resolve({pDetails,latitude,longitude})
+	    	        
+	      },
+	       error: function(jqXHR, textStatus, errorThrown){
+	    	   alert("Details about Location currently not available")
+	    },
+	    complete: function(){
+	        $('#loading-image').hide();
+	        $('#map').show();
+	      }
+	    });
+		  
+		    
+	  })
+}
+
+let  locationdetails = (ldetails)=> {
+
+	let list = getcoordinates(ldetails.coordinates)
+	let xy = getcentroid(list)
+
+	return {'list':list,'latitude':xy.x,'longitude':xy.y,'locationUid':ldetails.locationUid}
+	}
+
+
 
 
 let myFunction = () =>{
@@ -305,8 +461,6 @@ function changeMapLocation(latitude,longitude,list) {
      });
 
 marker.setMap(map)
-
-   
        var flightPath = new google.maps.Polyline({
          path: list,
          geodesic: true,
@@ -330,18 +484,7 @@ function initMap() {
      });
    }
 
-   let getaddressForGeoCode = (latitude,longitude,callback) => {
-     let geocoder = new google.maps.Geocoder;
-     var latlng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
-         geocoder.geocode( {'location': latlng}, function(results, status) {
-
-       if (status == google.maps.GeocoderStatus.OK) {
-        // console.log()
-  callback(results[0].formatted_address)
-      }
-     });
-   }
-
+  
 
 
 
@@ -497,29 +640,7 @@ $("#chartContainer").CanvasJSChart(options);
 	   getfutureprediction(datetime,locationUid)
    }
    
-   let  getfutureprediction =(datetime,locationUid)=>{
-	   
-	   console.log(datetime)
-	   $.ajax({
-		  
-		   type: "POST",
-		   dataType: "json",
-		   url : "http://localhost:5001/api/1.0/parkingprediction",
-		   data : {
-			   datetime: datetime,
-			  locationUid:locationUid
-		   },
-		   success : function(data) {
-			 console.log(data)
-		   },
-		 error: function(jqXHR, textStatus, errorThrown){
-		 alert(textStatus);
-		 }
-		 });
-	   
-	   
-	   
-   }
+  
    
    let  gettrafficheatmap = (latitude,longitude,data) =>{
 	
@@ -545,9 +666,6 @@ $("#chartContainer").CanvasJSChart(options);
 		   
 	   })
 	   
-	  
-	   
-	
    }
    
    let  getparkingheatmap = (latitude,longitude,data) =>{
